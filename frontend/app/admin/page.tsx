@@ -10,7 +10,12 @@ import { adminAPI } from '@/lib/api';
 export default function AdminPage() {
   const { isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalUsers: number;
+    totalReports: number;
+    reportsByType: Record<string, number>;
+    reportsByStatus: Record<string, number>;
+  }>({
     totalUsers: 0,
     totalReports: 0,
     reportsByType: {},
@@ -150,7 +155,7 @@ export default function AdminPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gothic-400 mb-1">Draft Reports</p>
-                <p className="text-xl font-bold text-gothic-100">{stats.reportsByStatus.DRAFT}</p>
+                <p className="text-xl font-bold text-gothic-100">{stats.reportsByStatus.DRAFT || 0}</p>
               </div>
               <FileText className="w-5 h-5 text-yellow-500" />
             </div>
@@ -160,7 +165,7 @@ export default function AdminPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gothic-400 mb-1">Resolved</p>
-                <p className="text-xl font-bold text-gothic-100">{stats.reportsByStatus.RESOLVED}</p>
+                <p className="text-xl font-bold text-gothic-100">{stats.reportsByStatus.RESOLVED || 0}</p>
               </div>
               <CheckSquare className="w-5 h-5 text-green-500" />
             </div>

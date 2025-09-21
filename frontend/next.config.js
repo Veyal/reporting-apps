@@ -12,8 +12,6 @@ const nextConfig = {
   },
   // Enable compression
   compress: true,
-  // Disable telemetry
-  telemetry: false,
   // Optimize for production
   poweredByHeader: false,
   // Generate build ID for cache busting

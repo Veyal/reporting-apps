@@ -8,6 +8,8 @@ interface User {
   username: string;
   name: string;
   role: 'USER' | 'ADMIN';
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 interface AuthContextType {

@@ -59,6 +59,10 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
   }, [existingPhotos]);
 
   const uploadSingleFile = async (photoFile: PhotoFile) => {
+    if (!photoFile.file) {
+      return { success: false, error: 'No file to upload' };
+    }
+
     const formData = new FormData();
     formData.append('category', category);
     formData.append('photos', photoFile.file); // Use the actual File object

@@ -351,12 +351,12 @@ const PhotoUploadSection: React.FC<PhotoUploadSectionProps> = ({
       </div>
 
       {/* Overall Requirements Summary */}
-      {categories.some(c => c.required) && (
+      {categories.some(c => c.minRequired > 0) && (
         <div className="gothic-card p-4">
           <h4 className="text-xs font-medium text-gothic-200 mb-3">Photo Requirements Summary</h4>
           <div className="space-y-2">
             {categories
-              .filter(c => c.required)
+              .filter(c => c.minRequired > 0)
               .map(category => {
                 const requirements = getRequirementsMet(category);
                 return (
@@ -364,7 +364,7 @@ const PhotoUploadSection: React.FC<PhotoUploadSectionProps> = ({
                     <span className="text-gothic-300">{category.name}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-gothic-400">
-                        {requirements.photoCount}/{category.minPhotos}
+                        {requirements.photoCount}/{category.minRequired}
                       </span>
                       {requirements.isValid ? (
                         <span className="text-success">✓</span>

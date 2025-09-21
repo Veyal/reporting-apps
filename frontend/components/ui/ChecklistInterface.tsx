@@ -58,6 +58,10 @@ const ChecklistInterface: React.FC<ChecklistInterfaceProps> = ({
   }, [items]); // Remove onProgressChange from dependencies to prevent infinite loop
 
   const fetchChecklistItems = async () => {
+    if (!reportId) {
+      setLoading(false);
+      return;
+    }
     try {
       console.log('Fetching checklist items for report:', reportId);
       const response = await reportsAPI.getReport(reportId);
@@ -139,10 +143,12 @@ const ChecklistInterface: React.FC<ChecklistInterfaceProps> = ({
         });
       } else {
         // In server mode, update via API
-        await reportsAPI.updateChecklist(reportId!, itemId, completed);
-        setItems(prev => prev.map(item =>
-          item.id === itemId ? { ...item, completed } : item
-        ));
+        if (reportId) {
+          await reportsAPI.updateChecklist(reportId, itemId, completed);
+          setItems(prev => prev.map(item =>
+            item.id === itemId ? { ...item, completed } : item
+          ));
+        }
       }
     } catch (error) {
       console.error('Failed to update checklist item:', error);
