@@ -2,12 +2,23 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  output: 'standalone',
   images: {
     domains: ['localhost'],
     unoptimized: true
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+  },
+  // Enable compression
+  compress: true,
+  // Disable telemetry
+  telemetry: false,
+  // Optimize for production
+  poweredByHeader: false,
+  // Generate build ID for cache busting
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
   }
 }
 
