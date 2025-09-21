@@ -1,0 +1,604 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+  }
+  
+  * {
+    @apply border-gothic-600;
+  }
+  
+  /* Mobile optimizations */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
+  }
+  
+  /* Improve touch targets */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+  
+  /* Prevent zoom on form inputs on iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+  
+  /* Bottom Navigation Styles */
+  .bottom-nav {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(26, 26, 26, 0.95);
+    border-top: 1px solid rgba(75, 85, 99, 0.3);
+  }
+  
+  /* Safe area for mobile devices */
+  @supports (padding: max(0px)) {
+    .bottom-nav {
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+  }
+  
+  /* Mobile-specific utilities */
+  .mobile-container {
+    @apply max-w-sm mx-auto px-4;
+  }
+  
+  .mobile-header {
+    @apply sticky top-0 z-40 bg-gothic-800/95 backdrop-blur-xl border-b border-gothic-700;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 45, 45, 0.9) 100%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .header-title {
+    @apply text-lg font-semibold bg-gradient-to-r from-accent-400 via-accent-500 to-accent-600 bg-clip-text text-transparent;
+    text-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+  }
+  
+  .header-subtitle {
+    @apply text-xs text-gothic-300 font-medium;
+    letter-spacing: 0.025em;
+  }
+  
+  .header-actions {
+    @apply flex items-center space-x-2;
+  }
+  
+  .header-badge {
+    @apply px-2 py-1 rounded-full text-xs font-medium bg-gothic-700/50 border border-gothic-600 text-gothic-200;
+    backdrop-filter: blur(10px);
+    font-size: 10px;
+  }
+  
+  /* Small badge/chip typography */
+  .badge-small {
+    @apply px-2 py-0.5 rounded-full text-xs font-medium;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  
+  .badge-xs {
+    @apply px-1.5 py-0.5 rounded text-xs font-medium;
+    font-size: 9px;
+    line-height: 1.1;
+  }
+  
+  .chip-small {
+    @apply px-2 py-1 rounded-lg text-xs font-medium;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  
+  /* Ultra-small badges for report cards */
+  .badge-micro {
+    @apply px-1.5 py-0.5 rounded text-xs font-normal;
+    font-size: 8px;
+    line-height: 1;
+  }
+  
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+  
+  .status-text {
+    @apply text-xs font-normal;
+    font-size: 8px;
+    line-height: 1;
+  }
+  
+  /* Date divider styles */
+  .date-divider {
+    @apply sticky top-0 z-10 bg-gothic-800/95 backdrop-blur-sm border-b border-gothic-700 py-2 px-3;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 45, 45, 0.9) 100%);
+  }
+  
+  .date-divider-text {
+    @apply text-xs font-medium text-gothic-300;
+    font-size: 10px;
+    letter-spacing: 0.025em;
+  }
+  
+  .date-group {
+    @apply space-y-2;
+  }
+  
+  /* Filter popup styles */
+  .filter-popup {
+    @apply fixed inset-0 z-[60] flex items-end justify-center p-4;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+  
+  .filter-content {
+    @apply bg-gothic-800 border border-gothic-700 rounded-2xl p-4 w-full max-w-sm max-h-[80vh] overflow-y-auto;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 45, 45, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+  
+  .filter-button {
+    @apply flex items-center space-x-2 px-4 py-3 rounded-xl border transition-all duration-200;
+    min-height: 44px;
+  }
+  
+  .filter-button-active {
+    @apply border-accent-500 bg-accent-500/10 text-accent-400;
+  }
+  
+  .filter-button-inactive {
+    @apply border-gothic-600 bg-gothic-800 text-gothic-300 hover:border-gothic-500 hover:bg-gothic-700;
+  }
+  
+  .filter-section {
+    @apply space-y-3;
+  }
+  
+  .filter-section-title {
+    @apply text-xs font-medium text-gothic-200;
+  }
+  
+  .filter-option {
+    @apply flex items-center space-x-2 p-2 rounded-lg border border-gothic-700 hover:border-gothic-600 transition-colors cursor-pointer;
+  }
+  
+  .filter-option-active {
+    @apply border-accent-500 bg-accent-500/10;
+  }
+  
+  .filter-option-inactive {
+    @apply border-gothic-700 hover:border-gothic-600;
+  }
+  
+  .header-button {
+    @apply px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200;
+    min-height: 36px;
+  }
+  
+  .mobile-card {
+    @apply gothic-card p-4 mb-4;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .mobile-card-auto {
+    @apply gothic-card p-4 mb-4;
+    width: auto;
+    max-width: 100%;
+  }
+  
+  .mobile-card-fit {
+    @apply gothic-card p-4 mb-4;
+    width: fit-content;
+    max-width: 100%;
+  }
+  
+  .mobile-card-flex {
+    @apply gothic-card p-4 mb-4;
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    max-width: 100%;
+  }
+  
+  /* Card width utilities */
+  .card-w-auto {
+    width: auto !important;
+  }
+  
+  .card-w-fit {
+    width: fit-content !important;
+  }
+  
+  .card-w-full {
+    width: 100% !important;
+  }
+  
+  .card-max-w-none {
+    max-width: none !important;
+  }
+  
+  .mobile-button {
+    @apply w-full py-3 rounded-xl font-medium text-sm;
+    min-height: 44px;
+  }
+  
+  .mobile-input {
+    @apply w-full py-3 px-3 rounded-lg text-sm;
+    min-height: 40px;
+  }
+  
+  /* Mobile typography */
+  .mobile-title {
+    @apply text-lg font-semibold text-gothic-100;
+  }
+  
+  .mobile-subtitle {
+    @apply text-sm font-medium text-gothic-200;
+  }
+  
+  .mobile-text {
+    @apply text-sm text-gothic-300;
+  }
+  
+  .mobile-caption {
+    @apply text-xs text-gothic-400;
+  }
+  
+  /* Report Type Color Coding */
+  .report-opening {
+    @apply text-green-400 bg-green-400/10 border-green-400/20;
+  }
+  
+  .report-closing {
+    @apply text-orange-400 bg-orange-400/10 border-orange-400/20;
+  }
+  
+  .report-problem {
+    @apply text-red-400 bg-red-400/10 border-red-400/20;
+  }
+  
+  .report-stock {
+    @apply text-blue-400 bg-blue-400/10 border-blue-400/20;
+  }
+  
+  .report-opening-bg {
+    @apply bg-green-500/20 border-green-500/30;
+  }
+  
+  .report-closing-bg {
+    @apply bg-orange-500/20 border-orange-500/30;
+  }
+  
+  .report-problem-bg {
+    @apply bg-red-500/20 border-red-500/30;
+  }
+  
+  .report-stock-bg {
+    @apply bg-blue-500/20 border-blue-500/30;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-gothic-900 text-gothic-50 font-sans antialiased;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold;
+  }
+  
+  h1 {
+    @apply text-4xl lg:text-5xl;
+  }
+  
+  h2 {
+    @apply text-3xl lg:text-4xl;
+  }
+  
+  h3 {
+    @apply text-2xl lg:text-3xl;
+  }
+  
+  h4 {
+    @apply text-xl lg:text-2xl;
+  }
+  
+  h5 {
+    @apply text-lg lg:text-xl;
+  }
+  
+  h6 {
+    @apply text-base lg:text-lg;
+  }
+}
+
+@layer components {
+  /* Gothic Card Component - Mobile First */
+  .gothic-card {
+    @apply bg-gothic-800 border border-gothic-700 rounded-2xl shadow-gothic;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(45, 45, 45, 0.7) 100%);
+    backdrop-filter: blur(20px);
+  }
+  
+  .gothic-card-hover {
+    @apply gothic-card transition-all duration-200 active:scale-95 hover:shadow-gothic-lg hover:border-gothic-600;
+  }
+  
+  /* Gothic Button Components - Mobile First */
+  .btn-primary {
+    @apply bg-accent-gradient text-white font-medium px-4 py-3 rounded-lg shadow-accent transition-all duration-200 active:scale-95;
+    min-height: 40px; /* Smaller touch target for elegant look */
+    font-size: 14px; /* Smaller text for elegance */
+  }
+  
+  .btn-secondary {
+    @apply bg-gothic-700 text-gothic-100 border border-gothic-600 font-medium px-4 py-3 rounded-lg shadow-gothic transition-all duration-200 active:scale-95;
+    min-height: 40px;
+    font-size: 14px;
+  }
+  
+  .btn-ghost {
+    @apply text-gothic-300 font-medium px-3 py-2 rounded-lg transition-all duration-200 active:scale-95;
+    min-height: 36px;
+    font-size: 14px;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 text-white font-medium px-4 py-3 rounded-lg shadow-gothic transition-all duration-200 active:scale-95;
+    min-height: 40px;
+    font-size: 14px;
+  }
+  
+  .bg-success {
+    background-color: var(--success);
+  }
+  
+  .bg-error {
+    background-color: var(--error);
+  }
+  
+  .bg-warning {
+    background-color: var(--warning);
+  }
+  
+  .btn-success {
+    @apply bg-success text-white font-medium px-6 py-3 rounded-lg shadow-gothic transition-all duration-300 hover:bg-emerald-600 hover:shadow-gothic-lg;
+  }
+  
+  /* Gothic Input Components - Mobile First */
+  .input-gothic {
+    @apply bg-gothic-800 border border-gothic-600 text-gothic-100 placeholder-gothic-400 rounded-lg px-3 py-3 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 focus:outline-none transition-all duration-200;
+    min-height: 40px; /* Smaller for elegant look */
+    font-size: 14px; /* Smaller text for elegance */
+  }
+  
+  .input-gothic:focus {
+    @apply shadow-accent;
+  }
+  
+  /* Gothic Form Components */
+  .form-group {
+    @apply space-y-2;
+  }
+  
+  .form-label {
+    @apply text-gothic-200 font-medium text-sm;
+  }
+  
+  .form-error {
+    @apply text-error text-sm mt-1;
+  }
+  
+  .form-help {
+    @apply text-gothic-400 text-sm mt-1;
+  }
+  
+  /* Gothic Navigation */
+  .nav-link {
+    @apply text-gothic-300 hover:text-gothic-100 transition-colors duration-300 font-medium;
+  }
+  
+  .nav-link-active {
+    @apply text-accent-400 border-b-2 border-accent-400;
+  }
+  
+  /* Gothic Badge Components */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .badge-primary {
+    @apply bg-accent-600 text-white;
+  }
+  
+  .badge-secondary {
+    @apply bg-gothic-700 text-gothic-200 border border-gothic-600;
+  }
+  
+  .badge-success {
+    @apply bg-success text-white;
+  }
+  
+  .badge-warning {
+    @apply bg-warning text-gothic-900;
+  }
+  
+  .badge-error {
+    @apply bg-error text-white;
+  }
+  
+  /* Gothic Status Indicators */
+  .status-draft {
+    @apply bg-gothic-600 text-gothic-200;
+  }
+  
+  .status-submitted {
+    @apply bg-warning text-gothic-900;
+  }
+  
+  .status-resolved {
+    @apply bg-success text-white;
+  }
+  
+  /* Gothic Loading Spinner */
+  .spinner {
+    @apply animate-spin rounded-full border-2 border-gothic-600 border-t-accent-500;
+  }
+  
+  /* Gothic Progress Bar */
+  .progress-bar {
+    @apply bg-gothic-700 rounded-full overflow-hidden;
+  }
+  
+  .progress-fill {
+    @apply bg-accent-gradient h-full transition-all duration-500 ease-out;
+  }
+  
+  /* Gothic Modal */
+  .modal-overlay {
+    @apply fixed inset-0 bg-gothic-900/80 backdrop-blur-sm z-[60];
+  }
+  
+  .modal-content {
+    @apply gothic-card max-w-md mx-auto mt-20 p-6;
+  }
+  
+  /* Gothic Table */
+  .table-gothic {
+    @apply w-full border-collapse;
+  }
+  
+  .table-gothic th {
+    @apply bg-gothic-700 text-gothic-200 font-medium text-left px-3 py-2 border-b border-gothic-600;
+    font-size: 12px;
+  }
+  
+  .table-gothic td {
+    @apply px-3 py-2 border-b border-gothic-700 text-gothic-300 bg-gothic-800;
+    font-size: 12px;
+  }
+  
+  .table-gothic tbody tr:hover {
+    @apply bg-gothic-700/50;
+  }
+  
+  .table-gothic tbody tr:hover td {
+    @apply bg-gothic-700/50;
+  }
+  
+  /* Table Container */
+  .table-container {
+    @apply bg-gothic-800 rounded-2xl overflow-hidden border border-gothic-700;
+  }
+  
+  /* Gothic Dropdown */
+  .dropdown {
+    @apply relative;
+  }
+  
+  .dropdown-menu {
+    @apply absolute right-0 mt-2 w-48 gothic-card shadow-gothic-lg z-10;
+  }
+  
+  .dropdown-item {
+    @apply block px-4 py-3 text-gothic-200 hover:bg-gothic-700 transition-colors duration-200;
+  }
+  
+  /* Gothic Photo Grid */
+  .photo-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+  }
+  
+  .photo-item {
+    @apply relative aspect-square gothic-card overflow-hidden cursor-pointer;
+  }
+  
+  
+  /* Gothic Checklist */
+  .checklist-item {
+    @apply flex items-center space-x-3 p-4 gothic-card-hover;
+  }
+  
+  .checklist-checkbox {
+    @apply w-5 h-5 rounded border-2 border-gothic-600 bg-gothic-800 text-accent-500 focus:ring-accent-500/20 focus:ring-2;
+  }
+  
+  .checklist-checkbox:checked {
+    @apply bg-accent-500 border-accent-500;
+  }
+  
+  /* Gothic Drag and Drop */
+  .dropzone {
+    @apply border-2 border-dashed border-gothic-600 rounded-lg p-8 text-center transition-colors duration-300;
+  }
+  
+  .dropzone-active {
+    @apply border-accent-500 bg-accent-500/10;
+  }
+  
+  .dropzone-accept {
+    @apply border-success bg-success/10;
+  }
+  
+  .dropzone-reject {
+    @apply border-error bg-error/10;
+  }
+}
+
+@layer utilities {
+  .text-gothic-gradient {
+    @apply bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent;
+  }
+
+  .border-gothic-gradient {
+    @apply border border-transparent bg-gradient-to-r from-gothic-800 to-gothic-700 bg-clip-border;
+  }
+
+  .shadow-gothic-glow {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
+
+  .backdrop-gothic {
+    backdrop-filter: blur(10px) saturate(180%);
+    background: rgba(10, 10, 10, 0.8);
+  }
+
+  /* Subtle pulse animation for unresolved problems */
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}

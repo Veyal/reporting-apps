@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("USER") // USER or ADMIN
+  lastLogin    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  reports Report[]
+
+  @@map("users")
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  type        String   // OPENING, CLOSING, PROBLEM, STOCK
+  title       String
+  description String?
+  status      String   @default("DRAFT") // DRAFT, SUBMITTED, RESOLVED
+  userId      String
+  submittedAt DateTime?
+  resolvedAt  DateTime?
+  resolution  String?
+  metadata    String? // JSON string for additional data
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos      ReportPhoto[]
+  checklists  ReportChecklist[]
+  stockReport StockReport?
+
+  @@map("reports")
+}
+
+model ReportPhoto {
+  id        String   @id @default(cuid())
+  reportId  String
+  category  String
+  filename  String
+  mimeType  String
+  size      Int
+  checksum  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("report_photos")
+}
+
+model PhotoCategory {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  name         String
+  description  String?
+  reportType   String   // OPENING, CLOSING, PROBLEM, STOCK
+  minRequired  Int      @default(0)
+  maxAllowed   Int      @default(10)
+  order        Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("photo_categories")
+}
+
+model ChecklistTemplate {
+  id        String   @id @default(cuid())
+  type      String   // OPENING, CLOSING
+  title     String
+  order     Int      @default(0)
+  required  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  reportChecklists ReportChecklist[]
+
+  @@map("checklist_templates")
+}
+
+model ReportChecklist {
+  id         String   @id @default(cuid())
+  reportId   String
+  templateId String
+  completed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  report   Report           @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  template ChecklistTemplate @relation(fields: [templateId], references: [id])
+
+  @@map("report_checklists")
+}
+
+model StockReport {
+  id              String   @id @default(cuid())
+  reportId        String   @unique
+  opening         Float
+  out             Float
+  closing         Float
+  postedAt        DateTime?
+  correctionCount Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("stock_reports")
+}
+
+model SystemSettings {
+  id                   String   @id @default(cuid())
+  systemName           String   @default("Business Reporting App")
+  maxFileSize          Int      @default(10) // MB
+  maxFilesPerUpload    Int      @default(10)
+  sessionTimeout       Int      @default(15) // minutes
+  refreshTokenDays     Int      @default(7)  // days
+  enableNotifications  Boolean  @default(true)
+  enableAutoBackup     Boolean  @default(true)
+  backupFrequency      String   @default("daily") // hourly, daily, weekly, monthly
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
