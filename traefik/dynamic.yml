@@ -1,0 +1,103 @@
+# Dynamic configuration for Traefik
+http:
+  routers:
+    # Frontend router
+    frontend-router:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - websecure
+      service: frontend-service
+      tls:
+        certResolver: letsencrypt
+      priority: 1
+
+    # Backend API router
+    backend-router:
+      rule: "Host(`localhost`) && PathPrefix(`/api`)"
+      entryPoints:
+        - websecure
+      service: backend-service
+      tls:
+        certResolver: letsencrypt
+      priority: 2
+
+    # Health check router (optional)
+    health-router:
+      rule: "Host(`localhost`) && Path(`/health`)"
+      entryPoints:
+        - websecure
+      service: backend-service
+      tls:
+        certResolver: letsencrypt
+      priority: 3
+
+  services:
+    # Frontend service
+    frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:3000"
+        healthCheck:
+          path: "/"
+          interval: "30s"
+          timeout: "5s"
+
+    # Backend service
+    backend-service:
+      loadBalancer:
+        servers:
+          - url: "http://backend:5000"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+          timeout: "5s"
+
+  middlewares:
+    # Security headers
+    security-headers:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+
+    # CORS headers
+    cors-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - OPTIONS
+          - PUT
+          - POST
+          - DELETE
+          - PATCH
+        accessControlAllowHeaders:
+          - "*"
+        accessControlAllowOriginList:
+          - "https://localhost"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+
+    # Rate limiting
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 200
+
+# TLS configuration
+tls:
+  options:
+    default:
+      minVersion: "VersionTLS12"
+      cipherSuites:
+        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_RSA_WITH_AES_128_GCM_SHA256"
