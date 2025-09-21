@@ -77,6 +77,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/reports', authenticateToken, reportRoutes);
 app.use('/api/photos', photoRoutes); // Photo categories are public
 app.use('/api/admin', authenticateToken, adminRoutes);
+app.use('/api/stock', require('./routes/stock'));
 
 // Error handling middleware
 app.use(errorHandler);

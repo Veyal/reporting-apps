@@ -114,18 +114,40 @@ model ReportChecklist {
 model StockReport {
   id              String   @id @default(cuid())
   reportId        String   @unique
-  opening         Float
-  out             Float
-  closing         Float
-  postedAt        DateTime?
-  correctionCount Int      @default(0)
+  stockDate       DateTime
+  syncedAt        DateTime?
+  completedAt     DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   // Relations
   report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  items  StockReportItem[]
 
   @@map("stock_reports")
+}
+
+model StockReportItem {
+  id              String   @id @default(cuid())
+  stockReportId   String
+  productId       String   // Olsera product ID
+  productName     String
+  productSku      String?
+  unit            String   @default("gram")
+  openingStock    Float    // Yesterday's closing or from API
+  expectedOut     Float    // From API (sum_sales_qty + sum_outgoing_qty)
+  actualClosing   Float?   // User input from scale
+  difference      Float?   // Calculated: (openingStock - expectedOut) - actualClosing
+  photoId         String?  // Reference to photo of scale
+  notes           String?
+  completed       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  stockReport StockReport @relation(fields: [stockReportId], references: [id], onDelete: Cascade)
+
+  @@map("stock_report_items")
 }
 
 model SystemSettings {
@@ -142,5 +164,21 @@ model SystemSettings {
   updatedAt            DateTime @updatedAt
 
   @@map("system_settings")
+}
+
+model ApiCredentials {
+  id           String   @id @default(cuid())
+  provider     String   @unique // "olsera"
+  appId        String
+  secretKey    String   // Should be encrypted in production
+  baseUrl      String
+  accessToken  String?
+  refreshToken String?
+  tokenExpiry  DateTime?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("api_credentials")
 }
 

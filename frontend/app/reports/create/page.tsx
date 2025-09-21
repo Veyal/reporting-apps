@@ -7,7 +7,7 @@ import { ArrowLeft, Save, Send, FileText, AlertCircle, Trash2, CheckSquare } fro
 import Link from 'next/link';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ChecklistInterface from '@/components/ui/ChecklistInterface';
-import StockSection from '@/components/ui/StockSection';
+import StockReportForm from '@/components/reports/StockReportForm';
 import PhotoUploadSection from '@/components/ui/PhotoUploadSection';
 import { reportsAPI } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
@@ -30,7 +30,7 @@ const reportTypes = {
   },
   STOCK: {
     label: 'Stock Report',
-    description: 'Inventory tracking and counts',
+    description: 'Raw materials inventory from Olsera',
     icon: '📦',
   },
 };
@@ -146,6 +146,9 @@ export default function CreateReportPage() {
       if (response.data.reports.length > 0) {
         setDrafts(response.data.reports);
         setShowDraftModal(true);
+      } else if (type === 'STOCK') {
+        // For STOCK reports, auto-create draft immediately if no existing drafts
+        await autoCreateDraft(type);
       }
     } catch (error) {
       console.error('Failed to check for drafts:', error);
@@ -462,11 +465,22 @@ export default function CreateReportPage() {
             )}
 
             {/* Stock Section - Only for STOCK reports */}
-            {reportType === 'STOCK' && (
+            {reportType === 'STOCK' && draftId && (
               <div className="gothic-card p-6">
-                <StockSection
-                  reportId={draftId || undefined}
-                  onStockUpdate={handleStockUpdate}
+                <h3 className="text-sm font-medium text-gothic-100 mb-4 flex items-center space-x-2">
+                  <span>📦</span>
+                  <span>Raw Materials Stock Tracking</span>
+                </h3>
+                <StockReportForm
+                  reportId={draftId}
+                  onComplete={() => {
+                    showToast({
+                      type: 'success',
+                      title: 'Stock report completed',
+                      message: 'All items have been tracked',
+                      duration: 3000
+                    });
+                  }}
                 />
               </div>
             )}

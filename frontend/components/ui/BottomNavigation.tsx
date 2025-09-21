@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Home, FileText, Plus, User, Bell, Settings } from 'lucide-react';
+import { Home, FileText, Plus, User, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 
@@ -33,12 +33,6 @@ const BottomNavigation = () => {
       icon: Plus,
       label: 'Create',
       active: pathname === '/reports/create'
-    },
-    {
-      href: '/activity',
-      icon: Bell,
-      label: 'Activity',
-      active: pathname === '/activity'
     },
     {
       href: '/profile',
