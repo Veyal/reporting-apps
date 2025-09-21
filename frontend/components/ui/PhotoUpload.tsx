@@ -186,9 +186,11 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
       <div {...getRootProps()} className={getDropzoneClassName()}>
         <input {...getInputProps()} />
         <div className="space-y-4">
-          <Upload className="w-12 h-12 text-gothic-400 mx-auto" />
+          <Upload className={`w-12 h-12 text-gothic-400 mx-auto transition-transform duration-300 gpu-accelerated ${
+            isDragActive ? 'scale-110 animate-bounce-in' : ''
+          }`} />
           <div>
-            <p className="text-gothic-200 font-medium mb-2 text-xs">
+            <p className="text-gothic-200 font-medium mb-2 text-xs animate-fade-in">
               {isDragActive
                 ? 'Drop photos here...'
                 : isDragReject
@@ -196,10 +198,10 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 : 'Drag & drop photos here, or click to select'
               }
             </p>
-            <p className="text-gothic-400 text-xs">
+            <p className="text-gothic-400 text-xs animate-fade-in-up" style={{animationDelay: '0.1s'}}>
               Supports JPEG, PNG, GIF, WebP (max 10MB each)
             </p>
-            <p className="text-gothic-500 text-xs mt-1">
+            <p className="text-gothic-500 text-xs mt-1 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               {uploadedFiles.length}/{maxFiles} photos uploaded
             </p>
           </div>
@@ -208,21 +210,25 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
       {/* File Preview */}
       {files.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {files.map((file) => (
-              <div key={file.id} className="photo-item group">
+            {files.map((file, index) => (
+              <div
+                key={file.id}
+                className="photo-item group animate-stagger-in gpu-accelerated hover-lift scale-tap"
+                style={{animationDelay: `${0.4 + index * 0.1}s`}}
+              >
                 {file.uploaded && !file.file ? (
                   <AuthenticatedImage
                     src={file.preview || ''}
                     alt="Uploaded photo"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 gpu-accelerated"
                   />
                 ) : (
                   <img
                     src={file.preview}
                     alt={file.file?.name || 'Uploaded photo'}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 gpu-accelerated"
                   />
                 )}
                 <div className="absolute inset-0 bg-gothic-900/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -236,7 +242,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                         <AlertCircle className="w-6 h-6 text-error" />
                         <button
                           onClick={() => removeFile(file.id!)}
-                          className="p-2 bg-error/80 hover:bg-error rounded-full transition-colors"
+                          className="p-2 bg-error/80 hover:bg-error rounded-full transition-all duration-200 scale-press gpu-accelerated"
                           title="Remove"
                         >
                           <X className="w-4 h-4 text-white" />
@@ -244,10 +250,10 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                       </>
                     ) : (
                       <>
-                        {file.uploaded && <CheckCircle className="w-5 h-5 text-success" />}
+                        {file.uploaded && <CheckCircle className="w-5 h-5 text-success animate-check-bounce" />}
                         <button
                           onClick={() => removeFile(file.id!)}
-                          className="p-2 bg-error/80 hover:bg-error rounded-full transition-colors"
+                          className="p-2 bg-error/80 hover:bg-error rounded-full transition-all duration-200 scale-press gpu-accelerated"
                           title="Delete photo"
                         >
                           <X className="w-4 h-4 text-white" />
@@ -267,8 +273,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                   </div>
                 )}
                 {file.uploaded && !file.error && (
-                  <div className="absolute top-2 right-2">
-                    <CheckCircle className="w-5 h-5 text-success" />
+                  <div className="absolute top-2 right-2 animate-bounce-in">
+                    <CheckCircle className="w-5 h-5 text-success animate-check-bounce" />
                   </div>
                 )}
               </div>

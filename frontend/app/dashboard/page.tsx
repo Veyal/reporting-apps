@@ -135,26 +135,26 @@ export default function DashboardPage() {
             Quick Actions
           </h2>
           <div className="grid grid-cols-2 gap-3">
-            <Link href="/reports/create?type=OPENING" className="gothic-card-hover report-opening-bg p-3 text-center group min-h-[80px] flex flex-col justify-center">
-              <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-1 group-active:scale-110 transition-transform" />
+            <Link href="/reports/create?type=OPENING" className="gothic-card-hover report-opening-bg p-3 text-center group min-h-[80px] flex flex-col justify-center animate-stagger-in stagger-delay-1 hover-lift">
+              <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-1 group-active:animate-spring transition-transform gpu-accelerated" />
               <h3 className="font-medium text-green-400 mb-1 text-xs">Opening</h3>
               <p className="text-xs text-green-300">Daily procedures</p>
             </Link>
-            
-            <Link href="/reports/create?type=CLOSING" className="gothic-card-hover report-closing-bg p-3 text-center group min-h-[80px] flex flex-col justify-center">
-              <CheckCircle className="w-6 h-6 text-orange-400 mx-auto mb-1 group-active:scale-110 transition-transform" />
+
+            <Link href="/reports/create?type=CLOSING" className="gothic-card-hover report-closing-bg p-3 text-center group min-h-[80px] flex flex-col justify-center animate-stagger-in stagger-delay-2 hover-lift">
+              <CheckCircle className="w-6 h-6 text-orange-400 mx-auto mb-1 group-active:animate-spring transition-transform gpu-accelerated" />
               <h3 className="font-medium text-orange-400 mb-1 text-xs">Closing</h3>
               <p className="text-xs text-orange-300">Daily procedures</p>
             </Link>
-            
-            <Link href="/reports/create?type=PROBLEM" className="gothic-card-hover report-problem-bg p-3 text-center group min-h-[80px] flex flex-col justify-center">
-              <AlertTriangle className="w-6 h-6 text-red-400 mx-auto mb-1 group-active:scale-110 transition-transform" />
+
+            <Link href="/reports/create?type=PROBLEM" className="gothic-card-hover report-problem-bg p-3 text-center group min-h-[80px] flex flex-col justify-center animate-stagger-in stagger-delay-3 hover-lift">
+              <AlertTriangle className="w-6 h-6 text-red-400 mx-auto mb-1 group-active:animate-spring transition-transform gpu-accelerated" />
               <h3 className="font-medium text-red-400 mb-1 text-xs">Problem</h3>
               <p className="text-xs text-red-300">Report issues</p>
             </Link>
-            
-            <Link href="/reports/create?type=STOCK" className="gothic-card-hover report-stock-bg p-3 text-center group min-h-[80px] flex flex-col justify-center">
-              <Package className="w-6 h-6 text-blue-400 mx-auto mb-1 group-active:scale-110 transition-transform" />
+
+            <Link href="/reports/create?type=STOCK" className="gothic-card-hover report-stock-bg p-3 text-center group min-h-[80px] flex flex-col justify-center animate-stagger-in stagger-delay-4 hover-lift">
+              <Package className="w-6 h-6 text-blue-400 mx-auto mb-1 group-active:animate-spring transition-transform gpu-accelerated" />
               <h3 className="font-medium text-blue-400 mb-1 text-xs">Stock</h3>
               <p className="text-xs text-blue-300">Inventory</p>
             </Link>
@@ -163,21 +163,21 @@ export default function DashboardPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-3 gap-2 mb-6">
-          <div className="mobile-card p-3">
+          <div className="mobile-card p-3 animate-stagger-in stagger-delay-5 hover-lift scale-tap">
             <div className="text-center">
               <p className="text-xs text-gothic-400 mb-1">Drafts</p>
               <p className="text-lg font-bold text-gothic-100">{draftReports.length}</p>
             </div>
           </div>
-          
-          <div className="mobile-card p-3">
+
+          <div className="mobile-card p-3 animate-stagger-in stagger-delay-6 hover-lift scale-tap">
             <div className="text-center">
               <p className="text-xs text-gothic-400 mb-1">Submitted</p>
               <p className="text-lg font-bold text-gothic-100">{submittedReports.length}</p>
             </div>
           </div>
-          
-          <div className="mobile-card p-3">
+
+          <div className="mobile-card p-3 animate-stagger-in hover-lift scale-tap" style={{animationDelay: '0.35s'}}>
             <div className="text-center">
               <p className="text-xs text-gothic-400 mb-1">Total</p>
               <p className="text-lg font-bold text-gothic-100">{reports.length}</p>
@@ -186,12 +186,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Reports */}
-        <div className="mobile-card">
+        <div className="mobile-card animate-fade-in-up" style={{animationDelay: '0.4s'}}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-medium text-gothic-200">
               Recent Reports
             </h2>
-            <Link href="/reports" className="text-accent-400 hover:text-accent-300 text-xs font-medium transition-colors">
+            <Link href="/reports" className="text-accent-400 hover:text-accent-300 text-xs font-medium transition-colors scale-tap">
               View All →
             </Link>
           </div>
@@ -208,12 +208,16 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {recentReports.map((report) => {
+              {recentReports.map((report, index) => {
                 const Icon = reportTypeIcons[report.type];
                 return (
-                  <div key={report.id} className="flex items-center justify-between p-2 bg-gothic-800 rounded-lg active:bg-gothic-700 transition-colors">
+                  <div
+                    key={report.id}
+                    className="flex items-center justify-between p-2 bg-gothic-800 rounded-lg scale-tap transition-colors animate-stagger-in gpu-accelerated"
+                    style={{animationDelay: `${0.5 + index * 0.1}s`}}
+                  >
                     <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      <Icon className={`w-4 h-4 flex-shrink-0 ${getReportTypeColors(report.type)}`} />
+                      <Icon className={`w-4 h-4 flex-shrink-0 ${getReportTypeColors(report.type)} transition-transform gpu-accelerated`} />
                       <div className="min-w-0 flex-1">
                         <h3 className="font-medium text-gothic-100 text-xs truncate">{report.title}</h3>
                         <p className="text-xs text-gothic-400 truncate">
@@ -223,7 +227,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center space-x-2 flex-shrink-0">
                       <div className="flex items-center space-x-1">
-                        <div className={`status-dot ${
+                        <div className={`status-dot transition-all duration-200 ${
                           report.status === 'DRAFT' ? 'bg-yellow-400' :
                           report.status === 'SUBMITTED' ? 'bg-blue-400' :
                           report.status === 'RESOLVED' ? 'bg-green-400' : 'bg-gothic-500'
@@ -237,11 +241,11 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       {report.status === 'DRAFT' ? (
-                        <Link href={`/reports/create?draft=${report.id}`} className="text-accent-400 active:text-accent-300 text-xs font-medium">
+                        <Link href={`/reports/create?draft=${report.id}`} className="text-accent-400 active:text-accent-300 text-xs font-medium scale-tap">
                           Continue
                         </Link>
                       ) : (
-                        <Link href={`/reports/${report.id}`} className="text-accent-400 active:text-accent-300 text-xs font-medium">
+                        <Link href={`/reports/${report.id}`} className="text-accent-400 active:text-accent-300 text-xs font-medium scale-tap">
                           View
                         </Link>
                       )}

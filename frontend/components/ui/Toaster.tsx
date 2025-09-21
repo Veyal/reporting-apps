@@ -80,8 +80,8 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
   return (
     <div
       className={`
-        gothic-card max-w-sm transform transition-all duration-300 ease-in-out
-        ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
+        gothic-card max-w-sm transform transition-all duration-300 ease-in-out gpu-accelerated
+        ${isVisible ? 'toast-enter translate-x-0 opacity-100' : 'toast-exit translate-x-full opacity-0'}
         ${getColors(toast.type)}
       `}
     >
@@ -98,7 +98,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
             setIsVisible(false);
             setTimeout(() => onRemove(toast.id), 300);
           }}
-          className="ml-3 flex-shrink-0 p-1 rounded-full hover:bg-black/20 transition-colors"
+          className="ml-3 flex-shrink-0 p-1 rounded-full hover:bg-black/20 transition-all duration-200 scale-press gpu-accelerated"
         >
           <X className="w-4 h-4" />
         </button>

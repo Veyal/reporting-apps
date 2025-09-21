@@ -53,18 +53,18 @@ const ResolutionModal: React.FC<ResolutionModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4 modal-overlay"
+      className="fixed inset-0 z-[60] flex items-end justify-center p-4 modal-backdrop gpu-accelerated"
       onClick={handleOverlayClick}
     >
-      <div className="gothic-card w-full max-w-md mx-auto p-6 animate-slide-up">
+      <div className="gothic-card w-full max-w-md mx-auto p-6 animate-slide-up gpu-accelerated">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 animate-fade-in-down">
           <h2 className="text-lg font-display font-semibold text-gothic-100">
             Mark as Resolved
           </h2>
           <button
             onClick={handleCancel}
-            className="p-1 rounded-lg hover:bg-gothic-700 transition-colors"
+            className="p-1 rounded-lg hover:bg-gothic-700 transition-colors scale-press gpu-accelerated"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 text-gothic-300" />
@@ -73,7 +73,7 @@ const ResolutionModal: React.FC<ResolutionModalProps> = ({
 
         {/* Report title if provided */}
         {reportTitle && (
-          <div className="mb-4">
+          <div className="mb-4 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
             <p className="text-sm text-gothic-300">
               <span className="text-gothic-400">Report:</span> {reportTitle}
             </p>
@@ -81,7 +81,7 @@ const ResolutionModal: React.FC<ResolutionModalProps> = ({
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
           <div className="form-group">
             <label htmlFor="resolution" className="form-label">
               Resolution Details <span className="text-red-400">*</span>

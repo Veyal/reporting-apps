@@ -204,14 +204,15 @@ const ChecklistInterface: React.FC<ChecklistInterfaceProps> = ({
         <div className="space-y-2">
             {items
               .sort((a, b) => a.template.order - b.template.order)
-              .map((item) => (
+              .map((item, index) => (
                 <button
                   key={item.id}
                   onClick={() => toggleItem(item.id, !item.completed)}
                   disabled={updating === item.id}
-                  className={`checklist-item w-full text-left transition-all duration-200 ${
+                  className={`checklist-item w-full text-left transition-all duration-200 animate-stagger-in gpu-accelerated ${
                     item.completed ? 'bg-gothic-700/50' : 'hover:bg-gothic-700/30'
                   } ${updating === item.id ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
+                  style={{animationDelay: `${index * 0.05}s`}}
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`flex-shrink-0 transition-colors ${
@@ -222,9 +223,9 @@ const ChecklistInterface: React.FC<ChecklistInterfaceProps> = ({
                       {updating === item.id ? (
                         <div className="spinner w-5 h-5" />
                       ) : item.completed ? (
-                        <CheckCircle className="w-5 h-5" />
+                        <CheckCircle className="w-5 h-5 animate-check-bounce" />
                       ) : (
-                        <Circle className="w-5 h-5" />
+                        <Circle className="w-5 h-5 transition-transform duration-200 hover:scale-110" />
                       )}
                     </div>
 

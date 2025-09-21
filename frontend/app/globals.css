@@ -150,14 +150,14 @@
   }
   
   .filter-content {
-    @apply bg-gothic-800 border border-gothic-700 rounded-2xl p-4 w-full max-w-sm max-h-[80vh] overflow-y-auto;
+    @apply bg-gothic-800 border border-gothic-700 rounded-2xl p-4 w-full max-w-sm max-h-[80vh] overflow-y-auto animate-slide-up gpu-accelerated;
     background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 45, 45, 0.9) 100%);
     backdrop-filter: blur(20px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   }
   
   .filter-button {
-    @apply flex items-center space-x-2 px-4 py-3 rounded-xl border transition-all duration-200;
+    @apply flex items-center space-x-2 px-4 py-3 rounded-xl border transition-all duration-200 scale-tap gpu-accelerated;
     min-height: 44px;
   }
   
@@ -346,30 +346,30 @@
   }
   
   .gothic-card-hover {
-    @apply gothic-card transition-all duration-200 active:scale-95 hover:shadow-gothic-lg hover:border-gothic-600;
+    @apply gothic-card transition-all duration-200 scale-tap hover:shadow-gothic-lg hover:border-gothic-600 gpu-accelerated;
   }
   
   /* Gothic Button Components - Mobile First */
   .btn-primary {
-    @apply bg-accent-gradient text-white font-medium px-4 py-3 rounded-lg shadow-accent transition-all duration-200 active:scale-95;
+    @apply bg-accent-gradient text-white font-medium px-4 py-3 rounded-lg shadow-accent transition-all duration-200 scale-press gpu-accelerated;
     min-height: 40px; /* Smaller touch target for elegant look */
     font-size: 14px; /* Smaller text for elegance */
   }
   
   .btn-secondary {
-    @apply bg-gothic-700 text-gothic-100 border border-gothic-600 font-medium px-4 py-3 rounded-lg shadow-gothic transition-all duration-200 active:scale-95;
+    @apply bg-gothic-700 text-gothic-100 border border-gothic-600 font-medium px-4 py-3 rounded-lg shadow-gothic transition-all duration-200 scale-press gpu-accelerated;
     min-height: 40px;
     font-size: 14px;
   }
   
   .btn-ghost {
-    @apply text-gothic-300 font-medium px-3 py-2 rounded-lg transition-all duration-200 active:scale-95;
+    @apply text-gothic-300 font-medium px-3 py-2 rounded-lg transition-all duration-200 scale-press gpu-accelerated;
     min-height: 36px;
     font-size: 14px;
   }
   
   .btn-danger {
-    @apply bg-red-600 text-white font-medium px-4 py-3 rounded-lg shadow-gothic transition-all duration-200 active:scale-95;
+    @apply bg-red-600 text-white font-medium px-4 py-3 rounded-lg shadow-gothic transition-all duration-200 scale-press gpu-accelerated;
     min-height: 40px;
     font-size: 14px;
   }
@@ -541,7 +541,7 @@
   
   /* Gothic Checklist */
   .checklist-item {
-    @apply flex items-center space-x-3 p-4 gothic-card-hover;
+    @apply flex items-center space-x-3 p-4 gothic-card-hover gpu-accelerated;
   }
   
   .checklist-checkbox {
@@ -600,5 +600,421 @@
 
   .animate-pulse-subtle {
     animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Mobile App Animations */
+
+  /* Page Transitions */
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-out-right {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes slide-out-left {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+  }
+
+  /* Fade Animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in-down {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scale Animations */
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes scale-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Bottom Sheet Animation */
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+
+  /* Spring Animation */
+  @keyframes spring {
+    0% {
+      transform: scale(1);
+    }
+    20% {
+      transform: scale(1.1);
+    }
+    40% {
+      transform: scale(0.95);
+    }
+    60% {
+      transform: scale(1.02);
+    }
+    80% {
+      transform: scale(0.98);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Check Animation */
+  @keyframes check-bounce {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Skeleton Loading */
+  @keyframes skeleton-pulse {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: calc(200px + 100%) 0;
+    }
+  }
+
+  /* Stagger Animation Base */
+  @keyframes stagger-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Navigation Spring */
+  @keyframes nav-spring {
+    0% {
+      transform: scale(1) translateY(0);
+    }
+    30% {
+      transform: scale(1.15) translateY(-2px);
+    }
+    50% {
+      transform: scale(0.95) translateY(1px);
+    }
+    70% {
+      transform: scale(1.05) translateY(-1px);
+    }
+    100% {
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Animation Classes */
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-slide-out-right {
+    animation: slide-out-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-slide-out-left {
+    animation: slide-out-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-fade-out {
+    animation: fade-out 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-fade-in-down {
+    animation: fade-in-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-scale-out {
+    animation: scale-out 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-spring {
+    animation: spring 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-nav-spring {
+    animation: nav-spring 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-check-bounce {
+    animation: check-bounce 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-stagger-in {
+    animation: stagger-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Interactive Animation Classes */
+  .scale-press {
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .scale-press:active {
+    transform: scale(0.95);
+  }
+
+  .scale-tap {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .scale-tap:active {
+    transform: scale(0.97);
+  }
+
+  .hover-lift {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Skeleton Loading Classes */
+  .skeleton {
+    background: linear-gradient(90deg, rgba(45, 45, 45, 0.4) 0%, rgba(75, 85, 99, 0.4) 50%, rgba(45, 45, 45, 0.4) 100%);
+    background-size: 200px 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-text {
+    @apply skeleton rounded h-4;
+  }
+
+  .skeleton-title {
+    @apply skeleton rounded h-6;
+  }
+
+  .skeleton-avatar {
+    @apply skeleton rounded-full;
+  }
+
+  .skeleton-card {
+    @apply skeleton rounded-2xl;
+  }
+
+  /* Stagger Animation Delays */
+  .stagger-delay-1 {
+    animation-delay: 0.05s;
+  }
+
+  .stagger-delay-2 {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-delay-3 {
+    animation-delay: 0.15s;
+  }
+
+  .stagger-delay-4 {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-delay-5 {
+    animation-delay: 0.25s;
+  }
+
+  .stagger-delay-6 {
+    animation-delay: 0.3s;
+  }
+
+  /* Performance Optimizations */
+  .gpu-accelerated {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Smooth Accordion */
+  .accordion-content {
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-in-out;
+    overflow: hidden;
+    will-change: max-height;
+  }
+
+  .accordion-content-open {
+    max-height: 1000px;
+    opacity: 1;
+  }
+
+  .accordion-content-closed {
+    max-height: 0;
+    opacity: 0;
+  }
+
+  /* Toast Animations */
+  .toast-enter {
+    animation: slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .toast-exit {
+    animation: slide-out-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Modal Backdrop */
+  .modal-backdrop {
+    animation: fade-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modal-backdrop-exit {
+    animation: fade-out 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
