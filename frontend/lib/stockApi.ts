@@ -83,6 +83,11 @@ axiosInstance.interceptors.response.use(
 export const stockAPI = {
   // Initialize stock report with data from Olsera
   initializeStockReport: async (reportId: string, stockDate: string) => {
+    console.log('Stock API: Making POST request to:', `/reports/${reportId}/initialize`);
+    console.log('Stock API: Full URL will be:', `${API_BASE_URL}/stock/reports/${reportId}/initialize`);
+    console.log('Stock API: Request payload:', { stockDate });
+    console.log('Stock API: Auth token available:', !!getAuthToken());
+
     const response = await axiosInstance.post(`/reports/${reportId}/initialize`, {
       stockDate
     });

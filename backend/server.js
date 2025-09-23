@@ -35,8 +35,8 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] 
+  origin: process.env.NODE_ENV === 'production'
+    ? [process.env.CORS_ORIGIN || 'https://do-dev.veyal.org']
     : ['http://localhost:3000'],
   credentials: true
 }));

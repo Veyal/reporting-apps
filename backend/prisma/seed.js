@@ -173,9 +173,7 @@ async function main() {
       await prisma.stockReport.create({
         data: {
           reportId: report.id,
-          opening: 150.0,
-          out: 25.0,
-          closing: 125.0
+          stockDate: report.createdAt // Use the same date as the report creation
         }
       });
     }
