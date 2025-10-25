@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Plus, Search, Filter, FileText, AlertTriangle, Package, CheckCircle, ArrowLeft, X, SlidersHorizontal, Clock, Edit } from 'lucide-react';
+import { Search, Filter, FileText, AlertTriangle, Package, CheckCircle, ArrowLeft, X, SlidersHorizontal, Clock, Edit } from 'lucide-react';
 import Link from 'next/link';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { reportsAPI } from '@/lib/api';
@@ -387,15 +387,6 @@ export default function ReportsPage() {
           </div>
         )}
       </main>
-
-      {/* Floating Action Button */}
-      <Link
-        href="/reports/create"
-        className="fixed bottom-24 right-4 bg-accent-500 hover:bg-accent-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-200 active:scale-95 z-[60] px-4 py-3"
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        <span className="text-sm font-medium">Add</span>
-      </Link>
 
       {/* Filter Popup */}
       {showFilterPopup && (

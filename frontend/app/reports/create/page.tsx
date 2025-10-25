@@ -62,6 +62,7 @@ export default function CreateReportPage() {
   const [draftId, setDraftId] = useState<string | null>(null);
   const [checklistProgress, setChecklistProgress] = useState({ completed: 0, total: 0, requiredCompleted: 0, requiredTotal: 0 });
   const [photoRequirementsMet, setPhotoRequirementsMet] = useState(true); // Default to true for reports without photo requirements
+  const [showPhotoSection, setShowPhotoSection] = useState(true);
   const [canSubmit, setCanSubmit] = useState(false);
 
   useEffect(() => {
@@ -103,6 +104,13 @@ export default function CreateReportPage() {
     // All requirements must be met: title, checklist (if applicable), and photos
     setCanSubmit(hasTitle && checklistRequirementsMet && photoRequirementsMet);
   }, [formData.title, reportType, checklistProgress, photoRequirementsMet]);
+
+  useEffect(() => {
+    if (reportType) {
+      setShowPhotoSection(true);
+      setPhotoRequirementsMet(true);
+    }
+  }, [reportType]);
 
   const loadDraftReport = async (draftId: string) => {
     try {
@@ -486,14 +494,22 @@ export default function CreateReportPage() {
             )}
 
             {/* Photo Upload Section */}
-            <div className="gothic-card p-6">
-              <PhotoUploadSection
-                reportId={draftId || undefined}
-                reportType={reportType}
-                onPhotosUpdate={handlePhotosUpdate}
-                onRequirementsChange={handlePhotoRequirementsChange}
-              />
-            </div>
+            {showPhotoSection && (
+              <div className="gothic-card p-6">
+                <PhotoUploadSection
+                  reportId={draftId || undefined}
+                  reportType={reportType}
+                  onPhotosUpdate={handlePhotosUpdate}
+                  onRequirementsChange={handlePhotoRequirementsChange}
+                  onCategoriesLoaded={(count) => {
+                    setShowPhotoSection(count > 0);
+                    if (count === 0) {
+                      setPhotoRequirementsMet(true);
+                    }
+                  }}
+                />
+              </div>
+            )}
 
           </div>
         ) : (

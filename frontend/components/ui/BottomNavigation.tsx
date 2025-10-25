@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Home, FileText, Plus, User, Settings } from 'lucide-react';
+import { Home, FileText, User, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 
@@ -29,12 +29,6 @@ const BottomNavigation = () => {
       active: pathname.startsWith('/reports') && pathname !== '/reports/create'
     },
     {
-      href: '/reports/create',
-      icon: Plus,
-      label: 'Create',
-      active: pathname === '/reports/create'
-    },
-    {
       href: '/profile',
       icon: User,
       label: 'Profile',
@@ -48,53 +42,40 @@ const BottomNavigation = () => {
     }] : [])
   ];
 
+  const columnCount = Math.max(navItems.length, 1);
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bottom-nav z-50">
-      <div className="max-w-md mx-auto">
-        <div className="flex items-center justify-around py-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isCreate = item.label === 'Create';
+      <div className="max-w-md mx-auto px-3 py-2">
+        <div className="rounded-2xl border border-gothic-700/60 bg-gothic-900/95 shadow-[0_-6px_25px_rgba(0,0,0,0.5)] px-2 py-1.5">
+          <div
+            className="grid gap-1"
+            style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+          >
+            {navItems.map((item) => {
+              const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setActiveTab(item.href)}
-                className={`flex flex-col items-center justify-center min-w-0 transition-all duration-200 gpu-accelerated ${
-                  isCreate
-                    ? 'relative -mt-4'
-                    : 'py-2 px-3 flex-1'
-                } ${
-                  item.active && !isCreate
-                    ? 'text-accent-400'
-                    : !isCreate && 'text-gothic-400 hover:text-gothic-200 scale-tap'
-                }`}
-              >
-                {isCreate ? (
-                  <>
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg scale-press gpu-accelerated ${
-                      item.active
-                        ? 'bg-accent-gradient animate-nav-spring shadow-accent-500/30'
-                        : 'bg-accent-500 hover:bg-accent-600 shadow-accent-500/20'
-                    } ${item.active ? 'animate-bounce-in' : ''}`}>
-                      <Icon className="w-7 h-7 text-white" />
-                    </div>
-                    <span className="text-xs font-medium mt-1 text-gothic-300">{item.label}</span>
-                  </>
-                ) : (
-                  <>
-                    <Icon className={`w-5 h-5 mb-1 transition-transform duration-200 gpu-accelerated ${
-                      item.active ? 'animate-nav-spring text-accent-400' : ''
-                    }`} />
-                    <span className={`text-xs font-medium truncate transition-all duration-200 ${
-                      item.active ? 'animate-fade-in-up' : ''
-                    }`}>{item.label}</span>
-                  </>
-                )}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setActiveTab(item.href)}
+                  className={`flex flex-col items-center gap-1 py-1.5 rounded-2xl transition-all duration-200 text-[11px] font-medium ${
+                    item.active
+                      ? 'bg-gothic-800/70 text-white border border-gothic-600 shadow-inner shadow-black/30'
+                      : 'text-gothic-400 hover:text-gothic-100 hover:bg-gothic-800/30'
+                  }`}
+                >
+                  <Icon
+                    className={`w-5 h-5 transition-transform duration-200 ${
+                      item.active ? 'scale-105 text-accent-300' : ''
+                    }`}
+                  />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </nav>

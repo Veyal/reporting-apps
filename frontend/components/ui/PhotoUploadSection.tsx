@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Camera, AlertCircle, CheckCircle } from 'lucide-react';
+import { Camera, CheckCircle } from 'lucide-react';
 import PhotoUpload from './PhotoUpload';
 import { photosAPI } from '@/lib/api';
 
@@ -22,6 +22,7 @@ interface PhotoUploadSectionProps {
   reportType: string;
   onPhotosUpdate?: (categoryId: string, photos: any[]) => void;
   onRequirementsChange?: (met: boolean) => void;
+  onCategoriesLoaded?: (count: number) => void;
 }
 
 const PhotoUploadSection: React.FC<PhotoUploadSectionProps> = ({
@@ -29,10 +30,12 @@ const PhotoUploadSection: React.FC<PhotoUploadSectionProps> = ({
   reportType,
   onPhotosUpdate,
   onRequirementsChange,
+  onCategoriesLoaded,
 }) => {
   const [categories, setCategories] = useState<PhotoCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadedPhotos, setUploadedPhotos] = useState<Record<string, any[]>>({});
+  const categoryCount = categories.length;
 
   useEffect(() => {
     fetchPhotoCategories();
@@ -46,14 +49,25 @@ const PhotoUploadSection: React.FC<PhotoUploadSectionProps> = ({
 
   // Check if all photo requirements are met
   useEffect(() => {
-    if (categories.length > 0 && onRequirementsChange) {
-      const allRequirementsMet = categories.every(category => {
-        if (category.minRequired === 0) return true; // Optional categories don't block submission
-        const photoCount = uploadedPhotos[category.code]?.length || 0;
-        return photoCount >= category.minRequired;
-      });
-      onRequirementsChange(allRequirementsMet);
+    if (!loading && onCategoriesLoaded) {
+      onCategoriesLoaded(categoryCount);
     }
+  }, [categoryCount, loading, onCategoriesLoaded]);
+
+  useEffect(() => {
+    if (!onRequirementsChange) return;
+
+    if (categories.length === 0) {
+      onRequirementsChange(true);
+      return;
+    }
+
+    const allRequirementsMet = categories.every(category => {
+      if (category.minRequired === 0) return true; // Optional categories don't block submission
+      const photoCount = uploadedPhotos[category.code]?.length || 0;
+      return photoCount >= category.minRequired;
+    });
+    onRequirementsChange(allRequirementsMet);
   }, [uploadedPhotos, categories, onRequirementsChange]);
 
   const fetchPhotoCategories = async () => {
@@ -229,29 +243,14 @@ const PhotoUploadSection: React.FC<PhotoUploadSectionProps> = ({
 
   if (loading) {
     return (
-      <div className="gothic-card p-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="spinner w-8 h-8" />
-        </div>
+      <div className="flex items-center justify-center py-8">
+        <div className="spinner w-8 h-8" />
       </div>
     );
   }
 
   if (categories.length === 0) {
-    return (
-      <div className="gothic-card p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <Camera className="w-4 h-4 text-gothic-400" />
-          <h3 className="text-sm font-display font-semibold text-gothic-100">
-            Photo Upload
-          </h3>
-        </div>
-        <div className="text-center py-8">
-          <Camera className="w-8 h-8 text-gothic-500 mx-auto mb-3" />
-          <p className="text-xs text-gothic-400">No photo categories configured for this report type</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const getRequirementsMet = (category: PhotoCategory) => {
@@ -336,6 +335,7 @@ const PhotoUploadSection: React.FC<PhotoUploadSectionProps> = ({
                   onUploadComplete={(photos) => handleUploadComplete(category.code, photos)}
                   onPhotoDelete={(photoId) => handlePhotoDelete(category.code, photoId)}
                   onUploadError={handleUploadError}
+                  cameraOnly={true}
                 />
               ) : (
                 <div className="text-center py-6 bg-gothic-700/30 rounded-lg border-2 border-dashed border-gothic-600">
