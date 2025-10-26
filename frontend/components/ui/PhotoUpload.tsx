@@ -16,6 +16,7 @@ interface PhotoUploadProps {
   onUploadComplete?: (photos: any[]) => void;
   onUploadError?: (error: string) => void;
   onPhotoDelete?: (photoId: string) => void;
+  cameraOnly?: boolean; // Force camera capture only
 }
 
 interface PhotoFile {
@@ -37,6 +38,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
   onUploadComplete,
   onUploadError,
   onPhotoDelete,
+  cameraOnly = true, // Default to camera only
 }) => {
   const [files, setFiles] = useState<PhotoFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<PhotoFile[]>([]);
@@ -122,6 +124,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     maxFiles: maxFiles - uploadedFiles.length,
     maxSize: 10 * 1024 * 1024, // 10MB
     disabled: uploadedFiles.length >= maxFiles,
+    noClick: cameraOnly ? false : false, // Allow click for camera capture
+    noDrag: cameraOnly ? true : false, // Disable drag when camera only
   });
 
   const removeFile = async (fileId: string) => {
@@ -188,7 +192,13 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     <div className="space-y-4">
       {/* Dropzone */}
       <div {...getRootProps()} className={getDropzoneClassName()}>
-        <input {...getInputProps()} />
+        <input 
+          {...getInputProps()} 
+          {...(cameraOnly ? { 
+            capture: 'environment', // Use back camera on mobile
+            accept: 'image/*' // Ensure image capture
+          } : {})}
+        />
         <div className="space-y-4">
           <Upload className={`w-12 h-12 text-gothic-400 mx-auto transition-transform duration-300 gpu-accelerated ${
             isDragActive ? 'scale-110 animate-bounce-in' : ''
@@ -199,11 +209,15 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 ? 'Drop photos here...'
                 : isDragReject
                 ? 'Invalid file type'
+                : cameraOnly 
+                ? 'Click to take a photo'
                 : 'Drag & drop photos here, or click to select'
               }
             </p>
             <p className="text-gothic-400 text-xs animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-              Supports JPEG, PNG, GIF, WebP (max 10MB each)
+              {cameraOnly 
+                ? 'Camera will open to capture photo'
+                : 'Supports JPEG, PNG, GIF, WebP (max 10MB each)'}
             </p>
             <p className="text-gothic-500 text-xs mt-1 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               {uploadedFiles.length}/{maxFiles} photos uploaded

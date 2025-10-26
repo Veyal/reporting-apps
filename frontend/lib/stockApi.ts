@@ -149,10 +149,10 @@ export interface StockReportItem {
   productName: string;
   productSku?: string;
   unit: string;
-  openingStock: number;
-  expectedOut: number;
-  actualClosing?: number;
-  difference?: number;
+  openingStock?: number | null;
+  expectedOut?: number | null;
+  actualClosing?: number | null;
+  difference?: number | null;
   photoId?: string;
   notes?: string;
   completed: boolean;
@@ -173,7 +173,7 @@ export interface StockReportStats {
   totalItems: number;
   completedItems: number;
   completionPercentage: number;
-  totalDifference: number;
-  negativeDifferences: StockReportItem[];
-  positiveDifferences: StockReportItem[];
+  totalDifference?: number;
+  negativeDifferences?: StockReportItem[];
+  positiveDifferences?: StockReportItem[];
 }

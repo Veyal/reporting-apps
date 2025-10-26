@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Calendar, Package, Scale, Camera, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Calendar, Package, Scale, Camera, CheckCircle, Loader2 } from 'lucide-react';
 import { stockAPI, StockReport, StockReportItem, StockReportStats } from '@/lib/stockApi';
 import { useToast } from '@/contexts/ToastContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StockReportFormProps {
   reportId: string;
@@ -12,14 +13,19 @@ interface StockReportFormProps {
 
 const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete }) => {
   const { showToast } = useToast();
-  const [stockDate, setStockDate] = useState(new Date().toISOString().split('T')[0]);
+  const { isAdmin } = useAuth();
+  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const [stockDate, setStockDate] = useState(today);
   const [stockReport, setStockReport] = useState<StockReport | null>(null);
   const [stats, setStats] = useState<StockReportStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<StockReportItem | null>(null);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const hasDifferenceStats = typeof stats?.totalDifference === 'number';
+  const totalDifference = hasDifferenceStats ? Number(stats?.totalDifference) : 0;
+  const negativeDiffCount = stats?.negativeDifferences?.length ?? 0;
+  const positiveDiffCount = stats?.positiveDifferences?.length ?? 0;
 
   // Load existing stock report if any, or auto-initialize for new reports
   useEffect(() => {
@@ -28,6 +34,12 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
       loadOrInitializeStockReport();
     }
   }, [reportId, hasInitialized]);
+
+  useEffect(() => {
+    if (!isAdmin && stockDate !== today) {
+      setStockDate(today);
+    }
+  }, [isAdmin, stockDate, today]);
 
   const loadOrInitializeStockReport = async () => {
     try {
@@ -74,7 +86,8 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
       setInitializing(true);
       const dateToUse = selectedDate || stockDate;
       console.log('Calling stock API to initialize report:', reportId, 'with date:', dateToUse);
-      const response = await stockAPI.initializeStockReport(reportId, dateToUse);
+      const effectiveDate = isAdmin ? dateToUse : today;
+      const response = await stockAPI.initializeStockReport(reportId, effectiveDate);
       console.log('Stock API response:', response);
 
       if (response.stockReport) {
@@ -85,7 +98,7 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
           showToast({
             type: 'warning',
             title: 'No data found',
-            message: `No raw materials data found for ${new Date(dateToUse).toLocaleDateString()}. Try selecting a different date.`,
+            message: `No raw materials data found for ${new Date(effectiveDate).toLocaleDateString()}. Try selecting a different date.`,
             duration: 5000
           });
           // Clear the report to show date selector again
@@ -106,7 +119,7 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
         showToast({
           type: 'success',
           title: 'Stock data fetched successfully',
-          message: `Found ${response.stockReport.items.length} raw materials for ${new Date(dateToUse).toLocaleDateString()}`,
+          message: `Found ${response.stockReport.items.length} raw materials for ${new Date(effectiveDate).toLocaleDateString()}`,
           duration: 3000
         });
         return true;
@@ -234,8 +247,10 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
                 type="date"
                 value={stockDate}
                 onChange={(e) => setStockDate(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 bg-gothic-800 border border-gothic-700 rounded-lg text-gothic-100 text-sm focus:outline-none focus:border-accent-400 transition-colors"
+                max={today}
+                min={isAdmin ? undefined : today}
+                disabled={!isAdmin}
+                className="w-full px-3 py-2 bg-gothic-800 border border-gothic-700 rounded-lg text-gothic-100 text-sm focus:outline-none focus:border-accent-400 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -258,11 +273,17 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
             </button>
 
             <div className="bg-gothic-800 rounded-lg p-3 mt-4">
-              <p className="text-xs text-gothic-400">
-                <strong className="text-gothic-300">Note:</strong> This will fetch all raw materials (Bahan Baku)
-                consumed on the selected date from the Olsera POS system. Make sure to select the correct date
-                for your stock count.
-              </p>
+              {isAdmin ? (
+                <p className="text-xs text-gothic-400">
+                  <strong className="text-gothic-300">Note:</strong> This will fetch all raw materials (Bahan Baku)
+                  consumed on the selected date from the Olsera POS system. Make sure to select the correct date
+                  for your stock count.
+                </p>
+              ) : (
+                <p className="text-xs text-gothic-400">
+                  Stock reports can only be submitted for today. Contact an administrator if a correction for a previous date is needed.
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -285,7 +306,7 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
                   year: 'numeric'
                 })}
               </span>
-              {stockReport.items.every(item => !item.completed) && (
+              {isAdmin && stockReport.items.every(item => !item.completed) && (
                 <button
                   onClick={() => {
                     if (confirm('This will clear current data and fetch new data. Continue?')) {
@@ -301,7 +322,7 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid gap-3 ${hasDifferenceStats ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
             <div className="bg-gothic-800 rounded-lg p-3">
               <p className="text-xs text-gothic-400 mb-1">Completion</p>
               <div className="flex items-center space-x-2">
@@ -320,24 +341,26 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
               </div>
             </div>
 
-            <div className="bg-gothic-800 rounded-lg p-3">
-              <p className="text-xs text-gothic-400 mb-1">Total Difference</p>
-              <p className={`text-lg font-bold ${
-                stats.totalDifference < 0 ? 'text-red-400' :
-                stats.totalDifference > 0 ? 'text-green-400' :
-                'text-gothic-100'
-              }`}>
-                {stats.totalDifference > 0 ? '+' : ''}{stats.totalDifference.toFixed(0)}g
-              </p>
-              <div className="flex items-center space-x-2 mt-1">
-                <span className="text-xs text-red-400">
-                  ↓ {stats.negativeDifferences.length}
-                </span>
-                <span className="text-xs text-green-400">
-                  ↑ {stats.positiveDifferences.length}
-                </span>
+            {hasDifferenceStats && (
+              <div className="bg-gothic-800 rounded-lg p-3">
+                <p className="text-xs text-gothic-400 mb-1">Total Difference</p>
+                <p className={`text-lg font-bold ${
+                  totalDifference < 0 ? 'text-red-400' :
+                  totalDifference > 0 ? 'text-green-400' :
+                  'text-gothic-100'
+                }`}>
+                  {totalDifference > 0 ? '+' : ''}{totalDifference.toFixed(0)}g
+                </p>
+                <div className="flex items-center space-x-2 mt-1">
+                  <span className="text-xs text-red-400">
+                    ↓ {negativeDiffCount}
+                  </span>
+                  <span className="text-xs text-green-400">
+                    ↑ {positiveDiffCount}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
@@ -388,7 +411,14 @@ const StockItemDisplay: React.FC<{
   item: StockReportItem;
   onEdit: () => void;
 }> = ({ item, onEdit }) => {
-  const expectedClosing = item.openingStock - item.expectedOut;
+  const openingStock = typeof item.openingStock === 'number' ? item.openingStock : null;
+  const expectedOut = typeof item.expectedOut === 'number' ? item.expectedOut : null;
+  const expectedClosing = openingStock !== null && expectedOut !== null
+    ? openingStock - expectedOut
+    : null;
+  const showReferenceData = openingStock !== null && expectedOut !== null && expectedClosing !== null;
+  const hasActualClosing = item.actualClosing !== null && item.actualClosing !== undefined;
+  const showDifference = showReferenceData && typeof item.difference === 'number';
 
   return (
     <div onClick={onEdit} className="cursor-pointer">
@@ -406,30 +436,35 @@ const StockItemDisplay: React.FC<{
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 text-xs">
-        <div>
-          <span className="text-gothic-400">Opening Stock: </span>
-          <span className="text-gothic-200">{item.openingStock}g</span>
+      {showReferenceData && (
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <span className="text-gothic-400">Opening Stock: </span>
+            <span className="text-gothic-200">{openingStock}g</span>
+          </div>
+          <div>
+            <span className="text-gothic-400">Used (from POS): </span>
+            <span className="text-gothic-200">{expectedOut}g</span>
+          </div>
+          <div>
+            <span className="text-gothic-400">Expected Closing: </span>
+            <span className="text-gothic-200">{expectedClosing}g</span>
+          </div>
         </div>
-        <div>
-          <span className="text-gothic-400">Used (from POS): </span>
-          <span className="text-gothic-200">{item.expectedOut}g</span>
-        </div>
-        <div>
-          <span className="text-gothic-400">Expected Closing: </span>
-          <span className="text-gothic-200">{expectedClosing}g</span>
-        </div>
-        {item.actualClosing !== null && item.actualClosing !== undefined && (
-          <>
-            <div>
-              <span className="text-gothic-400">Actual Closing: </span>
-              <span className="text-gothic-100 font-medium">{item.actualClosing}g</span>
-            </div>
+      )}
+
+      {hasActualClosing && (
+        <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+          <div>
+            <span className="text-gothic-400">Actual Closing: </span>
+            <span className="text-gothic-100 font-medium">{item.actualClosing}g</span>
+          </div>
+          {showDifference && (
             <div className="col-span-2">
               <span className="text-gothic-400">Difference: </span>
               <span className={`font-medium ${
-                item.difference && item.difference < 0 ? 'text-red-400' :
-                item.difference && item.difference > 0 ? 'text-green-400' :
+                (item.difference || 0) < 0 ? 'text-red-400' :
+                (item.difference || 0) > 0 ? 'text-green-400' :
                 'text-gothic-100'
               }`}>
                 {item.difference !== null && item.difference !== undefined && (
@@ -439,9 +474,9 @@ const StockItemDisplay: React.FC<{
                 )}
               </span>
             </div>
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {item.notes && (
         <p className="text-xs text-gothic-300 mt-2 italic">Note: {item.notes}</p>
@@ -471,7 +506,12 @@ const StockItemEditor: React.FC<{
   const [notes, setNotes] = useState(item.notes || '');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
-  const expectedClosing = item.openingStock - item.expectedOut;
+  const openingStock = typeof item.openingStock === 'number' ? item.openingStock : null;
+  const expectedOut = typeof item.expectedOut === 'number' ? item.expectedOut : null;
+  const expectedClosing = openingStock !== null && expectedOut !== null
+    ? openingStock - expectedOut
+    : null;
+  const showReferenceData = openingStock !== null && expectedOut !== null && expectedClosing !== null;
 
   const handleSave = () => {
     const closingValue = parseFloat(actualClosing);
@@ -498,20 +538,27 @@ const StockItemEditor: React.FC<{
         <h4 className="text-sm font-medium text-gothic-100 mb-2">
           {item.productName}
         </h4>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <span className="text-gothic-400">Opening: </span>
-            <span className="text-gothic-200 font-medium">{item.openingStock}g</span>
+        {showReferenceData && (
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="text-gothic-400">Opening: </span>
+              <span className="text-gothic-200 font-medium">{openingStock}g</span>
+            </div>
+            <div>
+              <span className="text-gothic-400">Used: </span>
+              <span className="text-gothic-200 font-medium">{expectedOut}g</span>
+            </div>
+            <div className="col-span-2">
+              <span className="text-gothic-400">Expected: </span>
+              <span className="text-gothic-200 font-medium">{expectedClosing}g</span>
+            </div>
           </div>
-          <div>
-            <span className="text-gothic-400">Used: </span>
-            <span className="text-gothic-200 font-medium">{item.expectedOut}g</span>
-          </div>
-          <div className="col-span-2">
-            <span className="text-gothic-400">Expected: </span>
-            <span className="text-gothic-200 font-medium">{expectedClosing}g</span>
-          </div>
-        </div>
+        )}
+        {!showReferenceData && (
+          <p className="text-xs text-gothic-400">
+            Enter the actual stock measured for this item.
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -539,6 +586,7 @@ const StockItemEditor: React.FC<{
           <input
             type="file"
             accept="image/*"
+            capture="environment"
             onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
             className="w-full px-3 py-2 bg-gothic-800 border border-gothic-700 rounded-lg text-gothic-100 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-gothic-700 file:text-gothic-300 hover:file:bg-gothic-600 transition-colors"
           />

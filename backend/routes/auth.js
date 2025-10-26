@@ -25,16 +25,19 @@ const registerSchema = Joi.object({
 
 // Helper function to generate tokens
 const generateTokens = (userId) => {
+  const accessTokenTTL = process.env.ACCESS_TOKEN_TTL_MIN || '15';
+  const refreshTokenTTL = process.env.REFRESH_TOKEN_TTL_DAYS || '7';
+  
   const accessToken = jwt.sign(
     { userId },
     process.env.JWT_SECRET,
-    { expiresIn: `${process.env.ACCESS_TOKEN_TTL_MIN}m` }
+    { expiresIn: `${accessTokenTTL}m` }
   );
 
   const refreshToken = jwt.sign(
     { userId, type: 'refresh' },
     process.env.JWT_SECRET,
-    { expiresIn: `${process.env.REFRESH_TOKEN_TTL_DAYS}d` }
+    { expiresIn: `${refreshTokenTTL}d` }
   );
 
   return { accessToken, refreshToken };

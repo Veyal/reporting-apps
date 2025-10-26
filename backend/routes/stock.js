@@ -4,10 +4,73 @@ const Joi = require('joi');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
-const stockService = require('../services/stockService');
 const { authenticateToken } = require('../middleware/auth');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const stockService = require('../services/stockService');
+
+const sanitizeStockItemForUser = (item) => {
+  if (!item) {
+    return item;
+  }
+
+  const {
+    openingStock,
+    expectedOut,
+    difference,
+    ...safeFields
+  } = item;
+
+  return safeFields;
+};
+
+const sanitizeStockReportForUser = (stockReport) => {
+  if (!stockReport) {
+    return stockReport;
+  }
+
+  return {
+    ...stockReport,
+    items: stockReport.items?.map(sanitizeStockItemForUser) || []
+  };
+};
+
+const sanitizeStatsForUser = (stats) => {
+  if (!stats) {
+    return stats;
+  }
+
+  const {
+    totalItems,
+    completedItems,
+    completionPercentage
+  } = stats;
+
+  return {
+    totalItems,
+    completedItems,
+    completionPercentage
+  };
+};
+
+const sanitizeSummaryForUser = (summary) => {
+  if (!summary) {
+    return summary;
+  }
+
+  return {
+    ...summary,
+    items: summary.items?.map((item) => {
+      const {
+        opening,
+        expectedOut,
+        difference,
+        ...rest
+      } = item;
+      return rest;
+    }) || []
+  };
+};
 
 // Configure multer for photo uploads
 const storage = multer.diskStorage({
@@ -75,12 +138,26 @@ router.post('/reports/:reportId/initialize', authenticateToken, async (req, res)
       return res.status(404).json({ message: 'Stock report not found' });
     }
 
+    if (req.user.role !== 'ADMIN') {
+      const requestedDate = req.body.stockDate;
+      const today = new Date().toISOString().split('T')[0];
+
+      if (requestedDate !== today) {
+        return res.status(400).json({
+          message: 'Stock reports can only be initialized for today'
+        });
+      }
+    }
+
     // Initialize stock report with Olsera data
     const stockReport = await stockService.initializeStockReport(reportId, value.stockDate);
+    const responseReport = req.user.role === 'ADMIN'
+      ? stockReport
+      : sanitizeStockReportForUser(stockReport);
 
     res.json({
       message: 'Stock report initialized successfully',
-      stockReport
+      stockReport: responseReport
     });
   } catch (error) {
     console.error('Failed to initialize stock report:', error);
@@ -115,10 +192,16 @@ router.get('/reports/:reportId', authenticateToken, async (req, res) => {
 
     const stockReport = await stockService.getStockReport(reportId);
     const stats = await stockService.getStockReportStats(reportId);
+    const responseReport = req.user.role === 'ADMIN'
+      ? stockReport
+      : sanitizeStockReportForUser(stockReport);
+    const responseStats = req.user.role === 'ADMIN'
+      ? stats
+      : sanitizeStatsForUser(stats);
 
     res.json({
-      stockReport,
-      stats
+      stockReport: responseReport,
+      stats: responseStats
     });
   } catch (error) {
     console.error('Failed to get stock report:', error);
@@ -164,10 +247,13 @@ router.patch('/items/:itemId', authenticateToken, async (req, res) => {
       req.body.photoId || null,
       value.notes
     );
+    const responseItem = req.user.role === 'ADMIN'
+      ? updatedItem
+      : sanitizeStockItemForUser(updatedItem);
 
     res.json({
       message: 'Stock item updated successfully',
-      item: updatedItem
+      item: responseItem
     });
   } catch (error) {
     console.error('Failed to update stock item:', error);
@@ -280,8 +366,11 @@ router.get('/reports/:reportId/summary', authenticateToken, async (req, res) => 
     }
 
     const summary = await stockService.generateStockSummary(reportId);
+    const responseSummary = req.user.role === 'ADMIN'
+      ? summary
+      : sanitizeSummaryForUser(summary);
 
-    res.json(summary);
+    res.json(responseSummary);
   } catch (error) {
     console.error('Failed to get stock summary:', error);
     res.status(500).json({ message: 'Failed to get stock summary' });
