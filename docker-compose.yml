@@ -51,7 +51,7 @@ services:
       - app-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`do-dev.veyal.org`) && PathRegexp(`frontend`, `^/(?!api).*$$`)"
+      - "traefik.http.routers.frontend.rule=Host(`do-dev.veyal.org`) && PathPrefix(`/`) && !PathPrefix(`/api`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
