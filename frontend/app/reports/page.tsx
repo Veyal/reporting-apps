@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Search, Filter, FileText, AlertTriangle, Package, CheckCircle, ArrowLeft, X, SlidersHorizontal, Clock, Edit } from 'lucide-react';
+import { Search, Filter, FileText, AlertTriangle, Package, CheckCircle, ArrowLeft, X, SlidersHorizontal, Clock, Edit, Plus } from 'lucide-react';
 import Link from 'next/link';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { reportsAPI } from '@/lib/api';
