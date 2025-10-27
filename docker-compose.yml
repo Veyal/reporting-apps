@@ -51,11 +51,11 @@ services:
       - app-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`do-dev.veyal.org`)"
+      - "traefik.http.routers.frontend.rule=Host(`do-dev.veyal.org`) && PathRegexp(`frontend`, `^/(?!api).*$$`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.frontend.priority=1"
+      - "traefik.http.routers.frontend.priority=10"
 
   # Backend service
   backend:
@@ -80,10 +80,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`do-dev.veyal.org`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.entrypoints=web,websecure"
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
-      - "traefik.http.routers.backend.priority=2"
+      - "traefik.http.routers.backend.priority=100"
+      - "traefik.http.routers.backend.service=backend"
 
 volumes:
   backend-uploads:
