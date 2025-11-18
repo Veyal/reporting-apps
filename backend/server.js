@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
+const https = require('https');
 const next = require('next');
 require('dotenv').config();
 
@@ -24,6 +26,21 @@ const nextApp = next({
   dir: nextFrontendDir
 });
 const handleNextRequest = nextApp.getRequestHandler();
+
+const hasTlsConfig = Boolean(process.env.TLS_CERT_FILE && process.env.TLS_KEY_FILE);
+let httpsOptions = null;
+
+if (hasTlsConfig) {
+  try {
+    httpsOptions = {
+      key: fs.readFileSync(path.resolve(process.env.TLS_KEY_FILE)),
+      cert: fs.readFileSync(path.resolve(process.env.TLS_CERT_FILE)),
+    };
+  } catch (error) {
+    console.error('❌ Unable to read TLS certificate or key files:', error.message);
+    process.exit(1);
+  }
+}
 
 // Create necessary directories
 const uploadDir = process.env.UPLOAD_DIR || './uploads';
@@ -108,8 +125,18 @@ const startServer = async () => {
     // After Next is ready, let it handle every non-API request
     app.all('*', (req, res) => handleNextRequest(req, res));
 
-    app.listen(PORT, HOST, () => {
-      console.log(`🚀 Server running on http://${HOST}:${PORT}`);
+    const server = httpsOptions
+      ? https.createServer(httpsOptions, app)
+      : http.createServer(app);
+
+    server.listen(PORT, HOST, () => {
+      const protocol = httpsOptions ? 'https' : 'http';
+      console.log(`🚀 Server running on ${protocol}://${HOST}:${PORT}`);
+      if (httpsOptions) {
+        console.log('🔒 HTTPS enabled (using TLS_CERT_FILE & TLS_KEY_FILE)');
+      } else {
+        console.log('⚠️  TLS_CERT_FILE/TLS_KEY_FILE not provided, falling back to HTTP.');
+      }
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
       console.log(`💾 Database: ${process.env.DATABASE_URL}`);
       console.log(`📁 Upload directory: ${uploadDir}`);
