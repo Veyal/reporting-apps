@@ -135,6 +135,17 @@ export const stockAPI = {
     return response.data;
   },
 
+  // Add custom item (not from Olsera)
+  addCustomItem: async (reportId: string, data: {
+    productName: string;
+    openingStock: number;
+    expectedOut?: number;
+    unit?: string;
+  }) => {
+    const response = await axiosInstance.post(`/reports/${reportId}/items`, data);
+    return response.data;
+  },
+
   // Get photo URL
   getPhotoUrl: (photoId: string) => {
     const token = getAuthToken();

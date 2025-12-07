@@ -377,6 +377,67 @@ router.get('/reports/:reportId/summary', authenticateToken, async (req, res) => 
   }
 });
 
+// Add custom stock item (not from Olsera)
+router.post('/reports/:reportId/items', authenticateToken, async (req, res) => {
+  try {
+    const { reportId } = req.params;
+
+    const schema = Joi.object({
+      productName: Joi.string().required().min(1).max(100),
+      openingStock: Joi.number().min(0).required(),
+      expectedOut: Joi.number().min(0).optional().default(0),
+      unit: Joi.string().optional().default('pcs')
+    });
+
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    // Verify report belongs to user
+    const report = await prisma.report.findFirst({
+      where: {
+        id: reportId,
+        userId: req.user.id,
+        type: 'STOCK'
+      },
+      include: {
+        stockReport: true
+      }
+    });
+
+    if (!report) {
+      return res.status(404).json({ message: 'Stock report not found' });
+    }
+
+    if (!report.stockReport) {
+      return res.status(400).json({ message: 'Stock report not initialized. Please select a date first.' });
+    }
+
+    // Create custom stock item
+    const customItem = await prisma.stockReportItem.create({
+      data: {
+        stockReportId: report.stockReport.id,
+        productId: `custom-${Date.now()}`,
+        productName: value.productName,
+        productSku: 'CUSTOM',
+        unit: value.unit,
+        openingStock: value.openingStock,
+        expectedOut: value.expectedOut,
+        completed: false
+      }
+    });
+
+    res.json({
+      message: 'Custom item added successfully',
+      item: customItem
+    });
+  } catch (error) {
+    console.error('Failed to add custom item:', error);
+    res.status(500).json({ message: 'Failed to add custom item' });
+  }
+});
+
 // Finalize stock report
 router.post('/reports/:reportId/finalize', authenticateToken, async (req, res) => {
   try {

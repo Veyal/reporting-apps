@@ -319,8 +319,8 @@ export default function CreateReportPage() {
               </div>
             )}
 
-            {/* Photo Upload Section */}
-            {showPhotoSection && (
+            {/* Photo Upload Section - Not for STOCK reports */}
+            {showPhotoSection && reportType !== 'STOCK' && (
               <div className="gothic-card p-6">
                 <PhotoUploadSection
                   reportId={reportId || undefined}
@@ -352,8 +352,8 @@ export default function CreateReportPage() {
               disabled={loading || !canSubmit}
               title={!canSubmit ? 'Complete all required items to submit' : 'Submit report'}
               className={`w-full py-3 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all duration-200 ${!canSubmit || loading
-                  ? 'bg-gothic-700 text-gothic-400 cursor-not-allowed opacity-50'
-                  : 'bg-accent-500 hover:bg-accent-600 text-white active:scale-95'
+                ? 'bg-gothic-700 text-gothic-400 cursor-not-allowed opacity-50'
+                : 'bg-accent-500 hover:bg-accent-600 text-white active:scale-95'
                 }`}
             >
               {loading ? (

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Package, Scale, Camera, CheckCircle, Loader2 } from 'lucide-react';
+import { Calendar, Package, Scale, CheckCircle, Loader2, Plus, X } from 'lucide-react';
 import { stockAPI, StockReport, StockReportItem, StockReportStats } from '@/lib/stockApi';
 import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +28,9 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
   const negativeDiffCount = stats?.negativeDifferences?.length ?? 0;
   const positiveDiffCount = stats?.positiveDifferences?.length ?? 0;
   const [showDateChangeConfirm, setShowDateChangeConfirm] = useState(false);
+  const [showAddCustomItem, setShowAddCustomItem] = useState(false);
+  const [customItemForm, setCustomItemForm] = useState({ productName: '', openingStock: '', expectedOut: '', unit: 'pcs' });
+  const [addingCustomItem, setAddingCustomItem] = useState(false);
 
   // Load existing stock report if any, or auto-initialize for new reports
   useEffect(() => {
@@ -213,6 +216,47 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
     }
   };
 
+  const handleAddCustomItem = async () => {
+    if (!customItemForm.productName.trim() || !customItemForm.openingStock) {
+      showToast({
+        type: 'error',
+        title: 'Please fill in required fields',
+        duration: 3000
+      });
+      return;
+    }
+
+    try {
+      setAddingCustomItem(true);
+      await stockAPI.addCustomItem(reportId, {
+        productName: customItemForm.productName.trim(),
+        openingStock: parseFloat(customItemForm.openingStock),
+        expectedOut: customItemForm.expectedOut ? parseFloat(customItemForm.expectedOut) : 0,
+        unit: customItemForm.unit || 'pcs'
+      });
+
+      // Reset form and reload
+      setCustomItemForm({ productName: '', openingStock: '', expectedOut: '', unit: 'pcs' });
+      setShowAddCustomItem(false);
+      await loadStockReport();
+
+      showToast({
+        type: 'success',
+        title: 'Custom item added',
+        duration: 2000
+      });
+    } catch (error: any) {
+      showToast({
+        type: 'error',
+        title: 'Failed to add custom item',
+        message: error.response?.data?.message,
+        duration: 5000
+      });
+    } finally {
+      setAddingCustomItem(false);
+    }
+  };
+
   if (loading || initializing) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -342,8 +386,8 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
               <div className="bg-gothic-800 rounded-lg p-3">
                 <p className="text-xs text-gothic-400 mb-1">Total Difference</p>
                 <p className={`text-lg font-bold ${totalDifference < 0 ? 'text-red-400' :
-                    totalDifference > 0 ? 'text-green-400' :
-                      'text-gothic-100'
+                  totalDifference > 0 ? 'text-green-400' :
+                    'text-gothic-100'
                   }`}>
                   {totalDifference > 0 ? '+' : ''}{totalDifference.toFixed(0)}g
                 </p>
@@ -386,6 +430,106 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
           </div>
         ))}
       </div>
+
+      {/* Add Custom Item Button */}
+      <button
+        onClick={() => setShowAddCustomItem(true)}
+        className="w-full py-3 px-4 border-2 border-dashed border-gothic-600 hover:border-accent-400 rounded-xl text-gothic-400 hover:text-accent-400 flex items-center justify-center space-x-2 transition-colors"
+      >
+        <Plus className="w-4 h-4" />
+        <span className="text-sm">Add Custom Item</span>
+      </button>
+
+      {/* Add Custom Item Modal */}
+      {showAddCustomItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddCustomItem(false)} />
+          <div className="relative bg-gothic-800 rounded-xl border border-gothic-700 w-full max-w-sm p-6 animate-fade-in">
+            <button
+              onClick={() => setShowAddCustomItem(false)}
+              className="absolute top-3 right-3 p-1 rounded-lg hover:bg-gothic-700 transition-colors"
+            >
+              <X className="w-4 h-4 text-gothic-400" />
+            </button>
+
+            <h3 className="text-lg font-display font-semibold text-gothic-100 mb-4">
+              Add Custom Item
+            </h3>
+            <p className="text-xs text-gothic-400 mb-4">
+              Add an item that's not in Olsera inventory
+            </p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-gothic-300 mb-1">Item Name *</label>
+                <input
+                  type="text"
+                  value={customItemForm.productName}
+                  onChange={(e) => setCustomItemForm({ ...customItemForm, productName: e.target.value })}
+                  placeholder="e.g., Coffee Beans Special"
+                  className="w-full px-3 py-2 bg-gothic-900 border border-gothic-700 rounded-lg text-gothic-100 text-sm focus:outline-none focus:border-accent-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gothic-300 mb-1">Opening Stock *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={customItemForm.openingStock}
+                    onChange={(e) => setCustomItemForm({ ...customItemForm, openingStock: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-3 py-2 bg-gothic-900 border border-gothic-700 rounded-lg text-gothic-100 text-sm focus:outline-none focus:border-accent-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gothic-300 mb-1">Expected Out</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={customItemForm.expectedOut}
+                    onChange={(e) => setCustomItemForm({ ...customItemForm, expectedOut: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-3 py-2 bg-gothic-900 border border-gothic-700 rounded-lg text-gothic-100 text-sm focus:outline-none focus:border-accent-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-gothic-300 mb-1">Unit</label>
+                <input
+                  type="text"
+                  value={customItemForm.unit}
+                  onChange={(e) => setCustomItemForm({ ...customItemForm, unit: e.target.value })}
+                  placeholder="pcs, kg, l"
+                  className="w-full px-3 py-2 bg-gothic-900 border border-gothic-700 rounded-lg text-gothic-100 text-sm focus:outline-none focus:border-accent-400"
+                />
+              </div>
+
+              <button
+                onClick={handleAddCustomItem}
+                disabled={addingCustomItem || !customItemForm.productName.trim() || !customItemForm.openingStock}
+                className="w-full py-2.5 bg-accent-500 hover:bg-accent-600 disabled:bg-gothic-700 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2"
+              >
+                {addingCustomItem ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Adding...</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    <span>Add Item</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Finalize Button */}
       {stats && stats.completionPercentage === 100 && (
@@ -473,8 +617,8 @@ const StockItemDisplay: React.FC<{
             <div className="col-span-2">
               <span className="text-gothic-400">Difference: </span>
               <span className={`font-medium ${(item.difference || 0) < 0 ? 'text-red-400' :
-                  (item.difference || 0) > 0 ? 'text-green-400' :
-                    'text-gothic-100'
+                (item.difference || 0) > 0 ? 'text-green-400' :
+                  'text-gothic-100'
                 }`}>
                 {item.difference !== null && item.difference !== undefined && (
                   <>
@@ -494,7 +638,7 @@ const StockItemDisplay: React.FC<{
       {item.photoId && (
         <div className="mt-2">
           <span className="text-xs text-green-400 flex items-center space-x-1">
-            <Camera className="w-3 h-3" />
+            <CheckCircle className="w-3 h-3" />
             <span>Photo attached</span>
           </span>
         </div>
@@ -589,7 +733,7 @@ const StockItemEditor: React.FC<{
 
         <div>
           <label className="block text-xs text-gothic-300 mb-2 flex items-center space-x-1">
-            <Camera className="w-3 h-3 text-gothic-400" />
+            <Package className="w-3 h-3 text-gothic-400" />
             <span>Photo (Optional)</span>
           </label>
           <input
