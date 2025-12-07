@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar, Package, Scale, CheckCircle, Loader2, Plus, X } from 'lucide-react';
 import { stockAPI, StockReport, StockReportItem, StockReportStats } from '@/lib/stockApi';
 import { useToast } from '@/contexts/ToastContext';
@@ -440,9 +441,9 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
         <span className="text-sm">Add Custom Item</span>
       </button>
 
-      {/* Add Custom Item Modal */}
-      {showAddCustomItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Add Custom Item Modal - rendered via portal to avoid parent overflow issues */}
+      {showAddCustomItem && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddCustomItem(false)} />
           <div className="relative bg-gothic-800 rounded-xl border border-gothic-700 w-full max-w-sm p-6 animate-fade-in">
             <button
@@ -528,7 +529,8 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Finalize Button */}
