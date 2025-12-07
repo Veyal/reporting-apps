@@ -26,6 +26,7 @@ backend/uploads/
 out/
 build/
 dist/
+backend/public/
 
 # Logs
 logs/

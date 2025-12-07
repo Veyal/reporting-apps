@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { authAPI } from '@/lib/api';
 
 interface User {
@@ -36,28 +36,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isAuthenticated = !!user;
-  const isAdmin = user?.role === 'ADMIN';
+  const isAuthenticated = useMemo(() => !!user, [user]);
+  const isAdmin = useMemo(() => user?.role === 'ADMIN', [user]);
 
   // Check if user is logged in on mount
   useEffect(() => {
+    let mounted = true;
+    let checked = false;
+
     const checkAuth = async () => {
+      if (checked || !mounted) return; // Prevent multiple checks
+      checked = true;
+
+      console.log('AuthContext: Starting auth check');
+
       try {
         const token = localStorage.getItem('accessToken');
-        if (token) {
+        console.log('AuthContext: Token exists:', !!token);
+
+        if (token && mounted) {
           const response = await authAPI.verify();
-          setUser(response.data.user);
+          if (mounted) {
+            console.log('AuthContext: Auth verification successful:', response.data.user.username);
+            setUser(response.data.user);
+          }
+        } else if (mounted) {
+          console.log('AuthContext: No token found, setting user to null');
+          setUser(null);
         }
       } catch (error) {
+        console.log('AuthContext: Auth verification failed:', error);
         // Token is invalid, clear it
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        if (mounted) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          console.log('AuthContext: Setting loading to false');
+          setLoading(false);
+        }
       }
     };
 
     checkAuth();
+
+    return () => {
+      console.log('AuthContext: Cleanup - setting mounted to false');
+      mounted = false;
+    };
   }, []);
 
   const login = async (credentials: { username: string; password: string }) => {

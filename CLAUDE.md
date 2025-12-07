@@ -133,8 +133,3 @@ NEVER proactively create documentation files (*.md) or README files. Only create
 - Stock tracking capabilities
 - Role-based access control
 - JWT token refresh mechanism
-
-## Docker Setup
-- Separate Dockerfiles for frontend/backend
-- Docker Compose for orchestration
-- Nginx configuration available

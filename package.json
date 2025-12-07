@@ -11,11 +11,7 @@
     "build:frontend": "cd frontend && npm run build",
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm start",
-    "docker:build": "docker-compose build",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f"
+    "start:frontend": "cd frontend && npm start"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

@@ -1,9 +1,8 @@
 import axios from 'axios';
 
 // Build API URL from environment variables or use default
-const BACKEND_HOST = process.env.NEXT_PUBLIC_BACKEND_HOST || 'localhost';
-const BACKEND_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT || '5001';
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || `http://${BACKEND_HOST}:${BACKEND_PORT}/api`;
+// When served by backend, always use relative /api
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 // Create axios instance
 const api = axios.create({
@@ -39,7 +38,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+          const response = await api.post('/auth/refresh', {
             refreshToken,
           });
 
@@ -52,10 +51,12 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh failed, redirect to login
+        // Refresh failed, redirect to login (but not if already there)
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }

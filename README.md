@@ -28,9 +28,9 @@ A mobile-optimized web application for business reporting and management with a 
 - Joi for input validation
 
 ### Deployment
-- Docker containers
-- Nginx reverse proxy
-- SSL/TLS support
+- Node.js standalone server
+- Static frontend assets served from Express
+- SSL/TLS support (when configured)
 - Health checks and monitoring
 
 ## Quick Start
@@ -38,7 +38,6 @@ A mobile-optimized web application for business reporting and management with a 
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- Docker (for production deployment)
 
 ### Development Setup
 
@@ -98,10 +97,7 @@ business-reporting-app/
 │   ├── components/        # React components
 │   ├── contexts/          # React contexts
 │   └── lib/               # Utility functions
-├── docker-compose.yml     # Docker services configuration
-├── Dockerfile.backend     # Backend container
-├── Dockerfile.frontend    # Frontend container
-└── nginx.conf            # Nginx configuration
+└── start.sh               # Production start script
 ```
 
 ## API Endpoints
@@ -137,45 +133,45 @@ business-reporting-app/
 
 ## Production Deployment
 
-### Using Docker Compose
+### Quick Start
+
+1. **Build and start the application**
+   ```bash
+   ./start.sh
+   ```
+
+   This will:
+   - Build the frontend
+   - Copy assets to the backend
+   - Start the server on port 5001
+
+2. **Access the application**
+   - Frontend: http://localhost:5001
+   - API: http://localhost:5001/api
+   - Health check: http://localhost:5001/health
+
+### Manual Deployment
 
 1. **Set up environment variables**
    ```bash
    export JWT_SECRET="your-super-secure-jwt-secret"
+   export NODE_ENV="production"
+   export PORT=5001
    ```
 
-2. **Build and start services**
+2. **Build the application**
    ```bash
-   docker-compose up -d
-   ```
-
-3. **Set up SSL certificates**
-   ```bash
-   # Using Let's Encrypt
-   sudo certbot certonly --standalone -d yourdomain.com
-   sudo cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem ./ssl/cert.pem
-   sudo cp /etc/letsencrypt/live/yourdomain.com/privkey.pem ./ssl/key.pem
-   ```
-
-4. **Update nginx.conf**
-   - Replace `yourdomain.com` with your actual domain
-   - Update SSL certificate paths if needed
-
-### Manual Deployment
-
-1. **Build frontend**
-   ```bash
-   cd frontend
+   cd backend
    npm run build
    ```
 
-2. **Start backend**
+3. **Start the server**
    ```bash
    cd backend
    npm start
    ```
 
-3. **Configure reverse proxy**
+4. **Configure reverse proxy** (optional)
    - Set up Nginx or similar
    - Configure SSL certificates
    - Set up rate limiting
@@ -186,18 +182,26 @@ business-reporting-app/
 
 #### Backend (.env)
 ```bash
+# Database
 DATABASE_URL="file:./data/dev.db"
-JWT_SECRET="your-secret-key"
+
+# Authentication
+JWT_SECRET="your-super-secure-jwt-secret-key-change-in-production"
 ACCESS_TOKEN_TTL_MIN=15
 REFRESH_TOKEN_TTL_DAYS=7
-UPLOAD_DIR="./uploads"
-PORT=5000
+
+# Server
+PORT=5001
 NODE_ENV=development
+UPLOAD_DIR="./uploads"
+
+# CORS (for production, set to your domain)
+CORS_ORIGIN="http://localhost:3000"
 ```
 
 #### Frontend
 ```bash
-NEXT_PUBLIC_API_URL="http://localhost:5000/api"
+NEXT_PUBLIC_API_URL="http://localhost:5001/api"
 ```
 
 ## Database Schema
