@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { ArrowLeft, Save, Send, FileText, AlertCircle, Trash2, CheckSquare } from 'lucide-react';
+import { ArrowLeft, Send, FileText, AlertCircle, CheckSquare } from 'lucide-react';
 import Link from 'next/link';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ChecklistInterface from '@/components/ui/ChecklistInterface';
@@ -585,71 +585,35 @@ export default function CreateReportPage() {
         )}
       </main>
 
-      {/* Floating Action Buttons */}
+      {/* Floating Action Button */}
       {reportType && (
-        <>
-          {/* Action Buttons with background container */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-gothic-900 border-t border-gothic-800 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-            <div className="mobile-container py-4">
-              <div className="flex gap-3">
-                {/* Save Draft Button */}
-                <button
-                  type="button"
-                  onClick={(e) => handleSubmit(e, false)}
-                  disabled={loading || saving || !formData.title}
-                  className="flex-1 py-3 px-4 bg-gothic-700 hover:bg-gothic-600 disabled:bg-gothic-800 disabled:cursor-not-allowed text-white rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all duration-200 active:scale-95"
-                >
-                  {saving ? (
-                    <>
-                      <LoadingSpinner size="sm" />
-                      <span className="text-sm font-medium">Saving...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      <span className="text-sm font-medium">{isDraftMode ? 'Save Changes' : 'Save Draft'}</span>
-                    </>
-                  )}
-                </button>
-
-                {/* Submit Button */}
-                <button
-                  type="button"
-                  onClick={(e) => handleSubmit(e, true)}
-                  disabled={loading || saving || !canSubmit}
-                  title={!canSubmit ? 'Complete all required items and photos to submit' : 'Submit report'}
-                  className={`flex-1 py-3 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all duration-200 ${!canSubmit || loading || saving
-                      ? 'bg-gothic-700 text-gothic-400 cursor-not-allowed opacity-50'
-                      : 'bg-accent-500 hover:bg-accent-600 text-white active:scale-95'
-                    }`}
-                >
-                  {loading && !saving ? (
-                    <>
-                      <LoadingSpinner size="sm" />
-                      <span className="text-sm font-medium">Submitting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      <span className="text-sm font-medium">Submit</span>
-                    </>
-                  )}
-                </button>
-              </div>
-              {/* Delete Draft Button - Only show for existing drafts */}
-              {isDraftMode && (
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  className="w-full mt-3 py-2.5 px-4 bg-error/10 hover:bg-error/20 text-error rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 active:scale-95"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="text-sm font-medium">Delete Draft</span>
-                </button>
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gothic-900 border-t border-gothic-800 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+          <div className="mobile-container py-4">
+            {/* Submit Button */}
+            <button
+              type="button"
+              onClick={(e) => handleSubmit(e, true)}
+              disabled={loading || !canSubmit}
+              title={!canSubmit ? 'Complete all required items and photos to submit' : 'Submit report'}
+              className={`w-full py-3 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all duration-200 ${!canSubmit || loading
+                ? 'bg-gothic-700 text-gothic-400 cursor-not-allowed opacity-50'
+                : 'bg-accent-500 hover:bg-accent-600 text-white active:scale-95'
+                }`}
+            >
+              {loading ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  <span className="text-sm font-medium">Submitting...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span className="text-sm font-medium">Submit Report</span>
+                </>
               )}
-            </div>
+            </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

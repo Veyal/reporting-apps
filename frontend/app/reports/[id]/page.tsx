@@ -11,6 +11,7 @@ import AuthenticatedImage from '@/components/ui/AuthenticatedImage';
 import { reportsAPI } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import ResolutionModal from '@/components/ui/ResolutionModal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -80,6 +81,7 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
   const [showResolutionModal, setShowResolutionModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -165,10 +167,6 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
   const handleDelete = async () => {
     if (!report) return;
 
-    if (!confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
-      return;
-    }
-
     try {
       await reportsAPI.deleteReport(report.id);
       showToast({
@@ -183,6 +181,8 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
         title: 'Failed to delete report',
         message: error.response?.data?.message
       });
+    } finally {
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -462,8 +462,8 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
                       <div
                         key={item.id}
                         className={`p-3 rounded-lg border ${item.completed
-                            ? 'bg-green-900/20 border-green-800'
-                            : 'bg-gothic-800 border-gothic-700'
+                          ? 'bg-green-900/20 border-green-800'
+                          : 'bg-gothic-800 border-gothic-700'
                           }`}
                       >
                         <div className="flex items-start justify-between mb-2">
@@ -506,8 +506,8 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
                             </div>
                             {isAdmin && item.difference !== null && item.difference !== undefined && (
                               <span className={`font-medium ${item.difference < 0 ? 'text-red-400' :
-                                  item.difference > 0 ? 'text-green-400' :
-                                    'text-gothic-300'
+                                item.difference > 0 ? 'text-green-400' :
+                                  'text-gothic-300'
                                 }`}>
                                 {item.difference > 0 ? '+' : ''}{item.difference.toFixed(0)}g diff
                               </span>
@@ -620,7 +620,7 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
             {/* Delete button - show for drafts or admins */}
             {(report.status === 'DRAFT' || isAdmin) && (
               <button
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="w-full mt-3 py-3 px-4 bg-error/10 hover:bg-error/20 text-error rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 active:scale-95"
               >
                 <Trash2 className="w-4 h-4" />
@@ -649,7 +649,7 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
 
               {/* Delete button for admins */}
               <button
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="w-full py-3 px-4 bg-error/10 hover:bg-error/20 text-error rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 active:scale-95"
               >
                 <Trash2 className="w-4 h-4" />
@@ -666,6 +666,17 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
         onClose={() => setShowResolutionModal(false)}
         onSubmit={handleResolve}
         reportTitle={report?.title}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        title="Delete Report"
+        message="Are you sure you want to delete this report? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
       />
     </div>
   );

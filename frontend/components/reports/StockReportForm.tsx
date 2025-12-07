@@ -5,6 +5,7 @@ import { Calendar, Package, Scale, Camera, CheckCircle, Loader2 } from 'lucide-r
 import { stockAPI, StockReport, StockReportItem, StockReportStats } from '@/lib/stockApi';
 import { useToast } from '@/contexts/ToastContext';
 import { useAuth } from '@/contexts/AuthContext';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface StockReportFormProps {
   reportId: string;
@@ -26,6 +27,7 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
   const totalDifference = hasDifferenceStats ? Number(stats?.totalDifference) : 0;
   const negativeDiffCount = stats?.negativeDifferences?.length ?? 0;
   const positiveDiffCount = stats?.positiveDifferences?.length ?? 0;
+  const [showDateChangeConfirm, setShowDateChangeConfirm] = useState(false);
 
   // Load existing stock report if any, or auto-initialize for new reports
   useEffect(() => {
@@ -308,12 +310,7 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
               </span>
               {isAdmin && stockReport.items.every(item => !item.completed) && (
                 <button
-                  onClick={() => {
-                    if (confirm('This will clear current data and fetch new data. Continue?')) {
-                      setStockReport(null);
-                      setStats(null);
-                    }
-                  }}
+                  onClick={() => setShowDateChangeConfirm(true)}
                   className="text-xs text-accent-400 hover:text-accent-300 transition-colors"
                 >
                   Change Date
@@ -344,11 +341,10 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
             {hasDifferenceStats && (
               <div className="bg-gothic-800 rounded-lg p-3">
                 <p className="text-xs text-gothic-400 mb-1">Total Difference</p>
-                <p className={`text-lg font-bold ${
-                  totalDifference < 0 ? 'text-red-400' :
-                  totalDifference > 0 ? 'text-green-400' :
-                  'text-gothic-100'
-                }`}>
+                <p className={`text-lg font-bold ${totalDifference < 0 ? 'text-red-400' :
+                    totalDifference > 0 ? 'text-green-400' :
+                      'text-gothic-100'
+                  }`}>
                   {totalDifference > 0 ? '+' : ''}{totalDifference.toFixed(0)}g
                 </p>
                 <div className="flex items-center space-x-2 mt-1">
@@ -370,9 +366,8 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
         {stockReport.items.map((item) => (
           <div
             key={item.id}
-            className={`gothic-card p-4 ${
-              item.completed ? 'border-green-900' : 'border-gothic-700'
-            }`}
+            className={`gothic-card p-4 ${item.completed ? 'border-green-900' : 'border-gothic-700'
+              }`}
           >
             {editingItem === item.id ? (
               <StockItemEditor
@@ -402,6 +397,21 @@ const StockReportForm: React.FC<StockReportFormProps> = ({ reportId, onComplete 
           <span>Finalize Stock Report</span>
         </button>
       )}
+
+      {/* Date Change Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDateChangeConfirm}
+        onConfirm={() => {
+          setStockReport(null);
+          setStats(null);
+          setShowDateChangeConfirm(false);
+        }}
+        onCancel={() => setShowDateChangeConfirm(false)}
+        title="Change Date"
+        message="This will clear current data and fetch new data. Continue?"
+        confirmText="Continue"
+        variant="warning"
+      />
     </div>
   );
 };
@@ -462,11 +472,10 @@ const StockItemDisplay: React.FC<{
           {showDifference && (
             <div className="col-span-2">
               <span className="text-gothic-400">Difference: </span>
-              <span className={`font-medium ${
-                (item.difference || 0) < 0 ? 'text-red-400' :
-                (item.difference || 0) > 0 ? 'text-green-400' :
-                'text-gothic-100'
-              }`}>
+              <span className={`font-medium ${(item.difference || 0) < 0 ? 'text-red-400' :
+                  (item.difference || 0) > 0 ? 'text-green-400' :
+                    'text-gothic-100'
+                }`}>
                 {item.difference !== null && item.difference !== undefined && (
                   <>
                     {item.difference > 0 ? '+' : ''}{item.difference.toFixed(0)}g
