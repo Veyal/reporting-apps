@@ -13,10 +13,43 @@ SERVER_PROTOCOL="http"
 
 echo "🚀 Starting Business Reporting Application..."
 
+# Load .env file if it exists
+load_env() {
+  if [[ -f "$ROOT_DIR/.env" ]]; then
+    echo "📄 Loading environment from .env"
+    set -a
+    source "$ROOT_DIR/.env"
+    set +a
+  else
+    echo "⚠️  No .env file found. Copy .env.example to .env and configure it."
+    echo "   Run: cp .env.example .env"
+    exit 1
+  fi
+}
+
 ensure_dependencies() {
   if [[ ! -d "node_modules" ]]; then
     echo "📦 Installing workspace dependencies..."
     npm install
+  fi
+}
+
+# Ensure database exists and is initialized
+ensure_database() {
+  local db_path="${DATABASE_URL#file:}"
+  local db_dir=$(dirname "$db_path")
+  
+  # Create data directory if needed
+  mkdir -p "$db_dir"
+  
+  if [[ ! -f "$db_path" ]]; then
+    echo "📊 Initializing database..."
+    cd backend
+    npx prisma db push
+    npx prisma db seed
+    cd "$ROOT_DIR"
+  else
+    echo "📊 Database exists at $db_path"
   fi
 }
 
@@ -89,7 +122,10 @@ build_frontend() {
   npm run build:frontend
 }
 
+# Execute the startup sequence
+load_env
 ensure_dependencies
+ensure_database
 prepare_https
 build_frontend
 

@@ -7,7 +7,10 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const next = require('next');
-require('dotenv').config();
+
+// Load .env from root directory (parent of backend)
+const rootDir = path.join(__dirname, '..');
+require('dotenv').config({ path: path.join(rootDir, '.env') });
 
 const authRoutes = require('./routes/auth');
 const reportRoutes = require('./routes/reports');
@@ -101,8 +104,8 @@ app.use('/uploads', express.static(uploadDir));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'healthy', 
+  res.status(200).json({
+    status: 'healthy',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
