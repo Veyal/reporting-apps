@@ -29,11 +29,11 @@ const stockReportSchema = Joi.object({
 // GET /api/reports - List reports with filters
 router.get('/', async (req, res, next) => {
   try {
-    const { 
-      type, 
-      status, 
-      page = 1, 
-      limit = 20, 
+    const {
+      type,
+      status,
+      page = 1,
+      limit = 20,
       search,
       sortBy = 'createdAt',
       sortOrder = 'desc'
@@ -115,7 +115,11 @@ router.get('/:id', async (req, res, next) => {
             template: true
           }
         },
-        stockReport: true
+        stockReport: {
+          include: {
+            items: true
+          }
+        }
       }
     });
 
@@ -190,7 +194,7 @@ router.patch('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const { error, value } = updateReportSchema.validate(req.body);
-    
+
     if (error) {
       return res.status(400).json({
         error: 'Validation Error',
@@ -452,7 +456,7 @@ router.post('/:id/stock', async (req, res, next) => {
   try {
     const { id } = req.params;
     const { error, value } = stockReportSchema.validate(req.body);
-    
+
     if (error) {
       return res.status(400).json({
         error: 'Validation Error',

@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Edit, Calendar, User, FileText, AlertTriangle, Package, CheckCircle, Clock, CheckSquare, Image as ImageIcon, Trash2, Send, Camera } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, User, FileText, AlertTriangle, Package, CheckCircle, Clock, CheckSquare, Image as ImageIcon, Trash2, Send, Camera, Scale } from 'lucide-react';
 import Link from 'next/link';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Header from '@/components/ui/Header';
@@ -46,6 +46,24 @@ interface Report {
       required: boolean;
     };
   }>;
+  stockReport?: {
+    id: string;
+    stockDate: string;
+    syncedAt?: string;
+    completedAt?: string;
+    items?: Array<{
+      id: string;
+      productName: string;
+      productSku?: string;
+      unit: string;
+      openingStock: number;
+      expectedOut: number;
+      actualClosing?: number;
+      difference?: number;
+      notes?: string;
+      completed: boolean;
+    }>;
+  };
 }
 
 interface ReportDetailPageProps {
@@ -105,7 +123,7 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
 
   const handleSubmit = async () => {
     if (!report) return;
-    
+
     try {
       await reportsAPI.submitReport(report.id);
       showToast({
@@ -146,11 +164,11 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
 
   const handleDelete = async () => {
     if (!report) return;
-    
+
     if (!confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
       return;
     }
-    
+
     try {
       await reportsAPI.deleteReport(report.id);
       showToast({
@@ -316,7 +334,7 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
             </div>
           </div>
         </div>
-        
+
         {/* User Info Card */}
         <div className="gothic-card p-4 mb-4">
           <div className="flex items-center justify-between">
@@ -385,37 +403,136 @@ export default function ReportDetailPage({ params }: ReportDetailPageProps) {
                   {report.checklists
                     .sort((a, b) => a.template.order - b.template.order)
                     .map((checklist) => (
-                    <div key={checklist.id} className="checklist-item">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex-shrink-0">
-                          {checklist.completed ? (
-                            <CheckCircle className="w-5 h-5 text-success" />
-                          ) : (
-                            <div className="w-5 h-5 rounded-full border-2 border-gothic-600" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2">
-                            <p className={`text-xs font-medium ${
-                              checklist.completed ? 'text-gothic-400 line-through' : 'text-gothic-200'
-                            }`}>
-                              {checklist.template.title}
-                            </p>
-                            {checklist.template.required && (
-                              <span className="badge badge-warning text-xs">
-                                Required
-                              </span>
+                      <div key={checklist.id} className="checklist-item">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-shrink-0">
+                            {checklist.completed ? (
+                              <CheckCircle className="w-5 h-5 text-success" />
+                            ) : (
+                              <div className="w-5 h-5 rounded-full border-2 border-gothic-600" />
                             )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2">
+                              <p className={`text-xs font-medium ${checklist.completed ? 'text-gothic-400 line-through' : 'text-gothic-200'
+                                }`}>
+                                {checklist.template.title}
+                              </p>
+                              {checklist.template.required && (
+                                <span className="badge badge-warning text-xs">
+                                  Required
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
                 <div className="mt-4 pt-4 border-t border-gothic-700">
                   <p className="text-xs text-gothic-400">
                     {report.checklists.filter(c => c.completed).length} of {report.checklists.length} completed
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* Stock Items - For STOCK reports */}
+            {report.type === 'STOCK' && report.stockReport?.items && report.stockReport.items.length > 0 && (
+              <div className="gothic-card p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Package className="w-4 h-4 text-blue-400" />
+                    <h2 className="text-sm font-display font-semibold text-gothic-100">
+                      Stock Items ({report.stockReport.items.length})
+                    </h2>
+                  </div>
+                  <span className="text-xs text-gothic-400">
+                    {new Date(report.stockReport.stockDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {report.stockReport.items.map((item) => {
+                    const expectedClosing = item.openingStock - item.expectedOut;
+                    return (
+                      <div
+                        key={item.id}
+                        className={`p-3 rounded-lg border ${item.completed
+                            ? 'bg-green-900/20 border-green-800'
+                            : 'bg-gothic-800 border-gothic-700'
+                          }`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h4 className="text-xs font-medium text-gothic-100">
+                              {item.productName}
+                            </h4>
+                            {item.productSku && (
+                              <p className="text-xs text-gothic-400">SKU: {item.productSku}</p>
+                            )}
+                          </div>
+                          {item.completed && (
+                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                          )}
+                        </div>
+
+                        {isAdmin && (
+                          <div className="grid grid-cols-3 gap-2 text-xs mb-2">
+                            <div>
+                              <span className="text-gothic-400">Opening: </span>
+                              <span className="text-gothic-200">{item.openingStock}g</span>
+                            </div>
+                            <div>
+                              <span className="text-gothic-400">Used: </span>
+                              <span className="text-gothic-200">{item.expectedOut}g</span>
+                            </div>
+                            <div>
+                              <span className="text-gothic-400">Expected: </span>
+                              <span className="text-gothic-200">{expectedClosing.toFixed(0)}g</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {item.actualClosing !== null && item.actualClosing !== undefined && (
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center space-x-1">
+                              <Scale className="w-3 h-3 text-accent-400" />
+                              <span className="text-gothic-300">Actual: </span>
+                              <span className="text-gothic-100 font-medium">{item.actualClosing}g</span>
+                            </div>
+                            {isAdmin && item.difference !== null && item.difference !== undefined && (
+                              <span className={`font-medium ${item.difference < 0 ? 'text-red-400' :
+                                  item.difference > 0 ? 'text-green-400' :
+                                    'text-gothic-300'
+                                }`}>
+                                {item.difference > 0 ? '+' : ''}{item.difference.toFixed(0)}g diff
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {item.notes && (
+                          <p className="text-xs text-gothic-400 mt-2 italic">Note: {item.notes}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 pt-4 border-t border-gothic-700">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gothic-400">
+                      {report.stockReport.items.filter(i => i.completed).length} of {report.stockReport.items.length} items completed
+                    </span>
+                    {report.stockReport.completedAt && (
+                      <span className="text-green-400">
+                        Finalized {new Date(report.stockReport.completedAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

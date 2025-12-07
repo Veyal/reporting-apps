@@ -173,6 +173,10 @@ export default function CreateReportPage() {
   const handleCreateNew = () => {
     setShowDraftModal(false);
     setDrafts([]);
+    // For STOCK reports, auto-create a new draft to prevent the form showing with empty draftId
+    if (reportType === 'STOCK') {
+      autoCreateDraft(reportType);
+    }
   };
 
   const autoCreateDraft = async (type: string) => {
@@ -530,9 +534,9 @@ export default function CreateReportPage() {
                     Existing Drafts Found
                   </h3>
                 </div>
-                
+
                 <p className="text-gothic-300 mb-6">
-                  You have {drafts.length} draft {reportTypes[reportType as keyof typeof reportTypes]?.label.toLowerCase()}(s). 
+                  You have {drafts.length} draft {reportTypes[reportType as keyof typeof reportTypes]?.label.toLowerCase()}(s).
                   Would you like to continue with an existing draft or create a new one?
                 </p>
 
@@ -614,11 +618,10 @@ export default function CreateReportPage() {
                   onClick={(e) => handleSubmit(e, true)}
                   disabled={loading || saving || !canSubmit}
                   title={!canSubmit ? 'Complete all required items and photos to submit' : 'Submit report'}
-                  className={`flex-1 py-3 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all duration-200 ${
-                    !canSubmit || loading || saving
+                  className={`flex-1 py-3 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all duration-200 ${!canSubmit || loading || saving
                       ? 'bg-gothic-700 text-gothic-400 cursor-not-allowed opacity-50'
                       : 'bg-accent-500 hover:bg-accent-600 text-white active:scale-95'
-                  }`}
+                    }`}
                 >
                   {loading && !saving ? (
                     <>
