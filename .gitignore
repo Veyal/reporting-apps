@@ -85,3 +85,6 @@ ssl/
 tmp/
 temp/
 
+
+# Build hash for start.sh optimization
+.frontend_build_hash

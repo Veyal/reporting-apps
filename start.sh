@@ -51,13 +51,17 @@ ensure_database() {
   mkdir -p "$db_dir"
   
   if [[ ! -f "$db_path" ]]; then
-    echo "📊 Initializing database..."
+    echo "📊 Initializing new database..."
     cd backend
     npx prisma db push
     npx prisma db seed
     cd "$ROOT_DIR"
   else
     echo "📊 Database exists at $db_path"
+    # Run migrations if schema changed
+    cd backend
+    npx prisma db push --skip-generate 2>/dev/null || true
+    cd "$ROOT_DIR"
   fi
 }
 
@@ -125,12 +129,31 @@ prepare_https() {
   echo "🔒 HTTPS enabled (cert: $TLS_CERT_FILE, key: $TLS_KEY_FILE)"
 }
 
+# Build frontend only if source files changed
 build_frontend() {
+  local hash_file="$ROOT_DIR/.frontend_build_hash"
+  local current_hash
+  
+  # Get hash of frontend source files (excluding .next and node_modules)
+  current_hash=$(find frontend/app frontend/components frontend/lib frontend/contexts -type f \( -name '*.tsx' -o -name '*.ts' -o -name '*.css' \) -exec md5sum {} \; 2>/dev/null | sort | md5sum | cut -d' ' -f1)
+  
+  # Check if build is needed
+  if [[ -f "$hash_file" ]] && [[ -d "frontend/.next" ]]; then
+    local stored_hash=$(cat "$hash_file")
+    if [[ "$current_hash" == "$stored_hash" ]]; then
+      echo "✅ Frontend unchanged, skipping build"
+      return 0
+    fi
+  fi
+  
   echo "🧱 Building frontend bundle..."
   # Clear Next.js cache to prevent stale build issues
   rm -rf frontend/.next
   # Build with NODE_ENV=production explicitly
   NODE_ENV=production npm run build:frontend
+  
+  # Store hash for next run
+  echo "$current_hash" > "$hash_file"
 }
 
 # Execute the startup sequence
