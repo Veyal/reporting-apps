@@ -11,6 +11,9 @@
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
