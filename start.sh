@@ -142,5 +142,6 @@ build_frontend
 
 SERVER_PORT="${PORT:-5001}"
 echo "🌐 Starting unified server on ${SERVER_PROTOCOL}://localhost:${SERVER_PORT} ..."
-NODE_ENV="${NODE_ENV:-production}" PORT="${SERVER_PORT}" node backend/server.js
+# Always use production mode for server (override any .env setting)
+NODE_ENV=production PORT="${SERVER_PORT}" node backend/server.js
 
