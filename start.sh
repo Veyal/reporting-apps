@@ -17,9 +17,17 @@ echo "🚀 Starting Business Reporting Application..."
 load_env() {
   if [[ -f "$ROOT_DIR/.env" ]]; then
     echo "📄 Loading environment from .env"
-    set -a
-    source "$ROOT_DIR/.env"
-    set +a
+    # Only export lines that look like KEY=value, ignore comments and empty lines
+    while IFS='=' read -r key value; do
+      # Skip empty lines, comments, and lines without =
+      [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+      # Remove leading/trailing whitespace from key
+      key=$(echo "$key" | xargs)
+      # Skip if key is empty after trimming
+      [[ -z "$key" ]] && continue
+      # Export the variable
+      export "$key=$value"
+    done < "$ROOT_DIR/.env"
   else
     echo "⚠️  No .env file found. Copy .env.example to .env and configure it."
     echo "   Run: cp .env.example .env"
