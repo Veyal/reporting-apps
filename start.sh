@@ -127,7 +127,10 @@ prepare_https() {
 
 build_frontend() {
   echo "🧱 Building frontend bundle..."
-  npm run build:frontend
+  # Clear Next.js cache to prevent stale build issues
+  rm -rf frontend/.next
+  # Build with NODE_ENV=production explicitly
+  NODE_ENV=production npm run build:frontend
 }
 
 # Execute the startup sequence
